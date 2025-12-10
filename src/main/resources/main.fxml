@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="container" prefHeight="600.0" prefWidth="800.0"
+           xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="controller.MainController">
+
+    <AnchorPane>
+        <ImageView fitHeight="600.0" fitWidth="800.0" pickOnBounds="true" preserveRatio="false">
+            <image>
+                <Image url="@images/cover.png" />
+            </image>
+        </ImageView>
+
+        <Button layoutX="360.0" layoutY="390.0"
+                style="-fx-font-size: 18px;"
+                text="新游戏"
+                onAction="#handleNewGame" />
+
+        <Button layoutX="348.0" layoutY="449.0"
+                mnemonicParsing="false"
+                prefHeight="38.0"
+                prefWidth="104.0"
+                text="继续游戏">
+            <font>
+                <Font size="19.0" />
+            </font>
+        </Button>
+    </AnchorPane>
+
+</StackPane>
