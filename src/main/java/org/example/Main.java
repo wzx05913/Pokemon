@@ -5,12 +5,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
+import database.DBConnection;
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
         try {
+        	
+        	// 初始化数据库连接（单例模式，首次调用创建连接池）
+            DBConnection.getInstance();
+            
             // 加载FXML文件
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
             Parent root = loader.load();
@@ -32,7 +36,12 @@ public class Main extends Application {
             System.err.println("加载FXML文件失败: " + e.getMessage());
         }
     }
-
+    @Override
+    public void stop() {
+        // 程序退出时关闭连接池
+        DBConnection.getInstance().close();
+    }
+    
     public static void main(String[] args) {
         // 启动JavaFX应用
         launch(args);
