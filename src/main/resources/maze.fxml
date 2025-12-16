@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 声明JavaFX版本和FXML命名空间，版本与项目依赖一致（25） -->
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.layout.Pane?>
+
+<!-- 根布局使用StackPane，适配800x600窗口尺寸，绑定MazeController控制器 -->
+<StackPane xmlns="http://javafx.com/javafx/25"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controller.MazeController"
+           prefWidth="800.0"
+           prefHeight="600.0"
+           style="-fx-background-color: #f0f0f0;"> <!-- 可选：添加背景色，提升视觉效果 -->
+
+    <!-- 迷宫绘制画布，fx:id与MazeController中的canvas变量名一致 -->
+    <Canvas fx:id="canvas"
+            width="800.0"
+            height="600.0"
+            focusTraversable="true"/> <!-- 允许画布获取焦点，处理键盘事件 -->
+
+</StackPane>

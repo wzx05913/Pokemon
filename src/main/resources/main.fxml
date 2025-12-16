@@ -12,22 +12,29 @@
            fx:controller="controller.MainController">
 
     <AnchorPane>
+        <!-- 背景图片 -->
         <ImageView fitHeight="600.0" fitWidth="800.0" pickOnBounds="true" preserveRatio="false">
             <image>
                 <Image url="@images/cover.png" />
             </image>
         </ImageView>
 
+        <!-- 新游戏按钮 -->
         <Button layoutX="360.0" layoutY="390.0"
-                style="-fx-font-size: 18px;"
                 text="新游戏"
-                onAction="#handleNewGame" />
+                onAction="#handleNewGame">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Button>
 
+        <!-- 继续游戏按钮 -->
         <Button layoutX="348.0" layoutY="449.0"
                 mnemonicParsing="false"
                 prefHeight="38.0"
                 prefWidth="104.0"
-                text="继续游戏">
+                text="继续游戏"
+                onAction="#enterMaze">
             <font>
                 <Font size="19.0" />
             </font>
