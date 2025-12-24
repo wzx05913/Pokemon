@@ -117,16 +117,16 @@ public class MazeController {
                 }
                 
                 gc.fillRect(x, y, cellSize, cellSize);
-                gc.setStroke(Color.GRAY);
-                gc.strokeRect(x, y, cellSize, cellSize);
+                //gc.setStroke(Color.GRAY);
+                //gc.strokeRect(x, y, cellSize, cellSize);
             }
         }
         
         // 绘制玩家（红点）
         gc.setFill(Color.RED);
-        int playerX = player.getY() * cellSize + cellSize / 4;
-        int playerY = player.getX() * cellSize + cellSize / 4;
-        gc.fillOval(playerX, playerY, cellSize / 2, cellSize / 2);
+        int playerX = player.getY() * cellSize;
+        int playerY = player.getX() * cellSize;
+        gc.fillOval(playerX, playerY, cellSize, cellSize);
     }
 
     private void openFightingWindow() {

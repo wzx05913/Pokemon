@@ -7,7 +7,7 @@ import java.util.Random;
  * 迷宫模型类，负责迷宫生成
  */
 public class Maze {
-    private static final int SIZE = 15; // 固定迷宫大小15x15
+    private static final int SIZE = 35; // 固定迷宫大小45x45
     private static final int WALL = 1;
     private static final int PATH = 0;
     private static final int TREASURE = 2; // 橙黄色点
@@ -75,7 +75,7 @@ public class Maze {
 
     private void placeTreasures() {
         Random random = new Random();
-        int treasureCount = 3 + random.nextInt(5); // 3-7个橙黄色点
+        int treasureCount = 10 + random.nextInt(5); // 3-7个橙黄色点
 
         for (int i = 0; i < treasureCount; i++) {
             int x, y;
