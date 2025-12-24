@@ -1,6 +1,12 @@
 package controller;
-
 import javafx.animation.FadeTransition;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -113,7 +119,20 @@ public class MainController {
         System.out.println("新游戏按钮被点击");
         switchToPageWithFade("dialog1");
     }
-
+    @FXML
+    private void enterMaze(ActionEvent event) {
+        try {
+            // 加载迷宫入口窗口
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/mazeEntry.fxml"));
+            Parent mazeEntryRoot = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("迷宫探索");
+            stage.setScene(new Scene(mazeEntryRoot, 400, 300));
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     // 返回主菜单
     @FXML
     private void backToMain() {
