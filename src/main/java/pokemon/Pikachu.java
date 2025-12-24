@@ -18,7 +18,7 @@ public class Pikachu extends Pokemon {
     protected void initializeMoves() {
         moves.add(new Move("电击", 40, 25));
         moves.add(new Move("撞击", 35, 35));
-        moves.add(new Move("电光一闪", 40, 30));
+        moves.add(new Move("十万伏特", 40, 30));
     }
 
     @Override

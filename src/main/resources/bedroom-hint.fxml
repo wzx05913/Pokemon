@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+
+    <children>
+        <ImageView fitHeight="600.0" fitWidth="800.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@images/room1.png" />
+            </image>
+        </ImageView>
+
+        <!-- 宠物按钮 - 使用像素风格 -->
+        <Button layoutX="615.0" layoutY="458.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="78.0" style="-fx-background-color: #6b4fbb; -fx-border-color: #000000; -fx-border-width: 3px; -fx-text-fill: #ffffff; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="宠物">
+            <font>
+                <Font name="Ark Pixel" size="12.0" />
+            </font>
+        </Button>
+
+        <!-- 休息按钮 - 使用复古风格 -->
+        <Button layoutX="183.0" layoutY="417.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #2d2d2d; -fx-border-color: #000000; -fx-border-width: 4px; -fx-border-style: segments(2, 2); -fx-text-fill: #ffffff; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-cursor: hand;" text="休息（存档）" textFill="#695050" textOverrun="LEADING_WORD_ELLIPSIS">
+            <font>
+                <Font name="Ark Pixel" size="12.0" />
+            </font>
+        </Button>
+
+        <!-- 外出按钮 - 使用RPG风格 -->
+        <Button layoutX="400.0" layoutY="365.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="78.0" style="-fx-background-color: #4a90e2; -fx-border-color: #1a3a5f; -fx-border-width: 3px; -fx-text-fill: #f0f0f0; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="外出">
+            <font>
+                <Font name="Ark Pixel" size="12.0" />
+            </font>
+        </Button>
+
+        <!-- 商店按钮 - 使用像素风格 -->
+        <Button layoutX="681.0" layoutY="25.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="78.0" style="-fx-background-color: #ff6b6b; -fx-border-color: #b33a3a; -fx-border-width: 3px; -fx-text-fill: #ffffff; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="商店">
+            <font>
+                <Font name="Ark Pixel" size="12.0" />
+            </font>
+        </Button>
+      <Label layoutX="69.0" layoutY="392.0" prefHeight="81.0" prefWidth="108.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 5px 15px; -fx-font-weight: bold; -fx-alignment: center; }: ;" text="在这里存储你现在的游戏进度。（记得存档！）" wrapText="true" />
+      <Label layoutX="431.0" layoutY="290.0" prefHeight="65.0" prefWidth="108.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 5px 15px; -fx-font-weight: bold; -fx-alignment: center; }: ;" text="外出地图，挑战和捕捉其他宝可梦" wrapText="true" />
+      <Label layoutX="666.0" layoutY="74.0" prefHeight="65.0" prefWidth="108.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 5px 15px; -fx-font-weight: bold; -fx-alignment: center; }: ;" text="这里购买宝可梦道具" wrapText="true" />
+      <Label layoutX="600.0" layoutY="382.0" prefHeight="65.0" prefWidth="108.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 5px 15px; -fx-font-weight: bold; -fx-alignment: center; }: ;" text="管理和照顾你的宠物" wrapText="true" />
+      <Button layoutX="346.0" layoutY="472.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="108.0" style="-fx-background-color: white; -fx-border-color: blue; -fx-border-width: 3px; -fx-text-fill: black; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="我清楚了">
+         <font>
+            <Font name="Ark Pixel" size="12.0" />
+         </font>
+      </Button>
+    </children>
+</AnchorPane>

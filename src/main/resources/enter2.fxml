@@ -42,7 +42,7 @@
    <children>
       <ImageView fitHeight="219.0" fitWidth="646.0" layoutX="77.0" layoutY="393.0" pickOnBounds="true" preserveRatio="true" style="-fx-blend-mode: transparent;">
          <image>
-            <Image url="@images/dialog.jpg" />
+            <Image url="@images/dialog.png" />
          </image>
       </ImageView>
       <Label contentDisplay="CENTER" layoutX="170.0" layoutY="402.0" prefHeight="54.0" prefWidth="88.0" text="你" textAlignment="CENTER" textOverrun="WORD_ELLIPSIS">

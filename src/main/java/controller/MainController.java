@@ -1,4 +1,14 @@
+// MainController.java
 package controller;
+
+import Player.Player;
+import service.SessionManager;
+import service.PetFactory;
+import database.UserDAO;
+import database.PetDAO;
+import entity.User;
+import entity.Pet;
+import pokemon.Pokemon;
 import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,13 +18,16 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
+import javafx.animation.FadeTransition;
 import javafx.util.Duration;
-import java.util.HashMap;
+import java.sql.SQLException;
 import java.util.Map;
+import java.util.HashMap;
 
 public class MainController {
 
@@ -22,28 +35,44 @@ public class MainController {
     private StackPane container;
 
     private Map<String, Parent> pages = new HashMap<>();
-    private boolean initialized = false;  // 添加标记
+    private boolean initialized = false;
+    private SessionManager sessionManager = SessionManager.getInstance();
 
-    // 初始化
     @FXML
     private void initialize() {
-        if (!initialized) {  // 防止重复初始化
+        if (!initialized) {
             initialized = true;
             System.out.println("控制器初始化开始");
 
             try {
-                // 调用loadPage方法加载页面
                 loadPage("dialog1", "/enter1.fxml");
                 loadPage("dialog2", "/enter2.fxml");
-                loadPage("dialog3", "/select.fxml");
+                loadPage("select", "/select.fxml");
+                loadPage("main1", "/bedroom.fxml");
+                loadPage("hint", "/bedroom-hint.fxml");
 
                 System.out.println("初始化完成");
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
+
+    // 继续游戏按钮
+    @FXML
+    private void handleContinueGame() {
+        System.out.println("继续游戏按钮被点击");
+        // 这里可以添加加载已有用户的功能
+    }
+
+    // 创建新用户
+
+    //private void createNewUser() throws SQLException {
+        //UserDAO userDAO = new UserDAO();
+        //User newUser = userDAO.createUser();
+        //sessionManager.setCurrentUser(newUser);
+        //System.out.println("新用户创建成功，用户ID: " + newUser.getUserId());
+    //}
 
     // 加载页面
     private void loadPage(String name, String fxmlPath) {
@@ -52,17 +81,18 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent page = loader.load();
 
-            // 根据页面名称添加不同的点击事件
-            if (name.equals("dialog1")) {
-                page.setOnMouseClicked(event -> {
-                    System.out.println("点击dialog1，切换到dialog2");
-                    switchToPage("dialog2");
-                });
-            } else if (name.equals("dialog2")) {
-                page.setOnMouseClicked(event -> {
-                    System.out.println("点击dialog2，切换到dialog3");
-                    switchToPage("dialog3");
-                });
+            // 为select页面设置控制器
+            if ("select".equals(name)) {
+                SelectController selectController = loader.getController();
+                // 可以传递MainController实例
+                selectController.setMainController(this);
+            }
+
+            // 设置点击事件切换页面
+            if ("dialog1".equals(name)) {
+                page.setOnMouseClicked(event -> switchToPageWithFade("dialog2"));
+            } else if ("dialog2".equals(name)) {
+                page.setOnMouseClicked(event -> switchToPageWithFade("select"));
             }
 
             pages.put(name, page);
@@ -73,7 +103,54 @@ public class MainController {
         }
     }
 
-    // 切换到指定页面
+    // 选择宠物
+    public void selectPet(String petName) {
+        try {
+            Player newPlayer = new Player();
+
+            // 1. 创建Pokemon游戏对象
+            Pokemon pokemon = PetFactory.createPokemon(petName, 1);
+
+            newPlayer.addPet(pokemon);
+
+            // 4. 更新会话状态
+            sessionManager.setCurrentPokemon(pokemon);
+
+            System.out.println("宠物创建成功！");
+            System.out.println("宠物名称: " + pokemon.getName());
+            System.out.println("宠物等级: " + pokemon.getLevel());
+            System.out.println("宠物攻击力: " + pokemon.getAttack());
+            System.out.println("最大HP: " + pokemon.getMaxHp());
+
+            // 5. 显示创建成功消息
+            showSuccessAlert(petName);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("错误", "创建宠物失败: " + e.getMessage());
+        }
+    }
+
+    private void showSuccessAlert(String petName) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("宠物创建成功");
+        alert.setHeaderText(null);
+        alert.setContentText("恭喜！你选择了" + petName + "！\n游戏即将开始...");
+        alert.setOnHidden(event -> {
+            switchToPageWithFade("main1");
+        });
+
+        alert.show();
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
     private void switchToPage(String pageName) {
         if (pages.containsKey(pageName)) {
             container.getChildren().clear();
@@ -84,7 +161,6 @@ public class MainController {
         }
     }
 
-    // 带淡入淡出动画的切换
     private void switchToPageWithFade(String pageName) {
         if (pages.containsKey(pageName) && !container.getChildren().isEmpty()) {
             Parent newPage = pages.get(pageName);

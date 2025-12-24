@@ -52,6 +52,7 @@ public abstract class Pokemon {
         this.exp += expGained;
         if (this.exp >= this.expToNextLevel) {
             levelUp();
+            exp=exp%this.expToNextLevel;
         }
     }
 
@@ -114,5 +115,6 @@ public abstract class Pokemon {
 
     // Setters
     public void setHp(int hp) { this.hp = Math.min(hp, maxHp); }
+    public void setExp(int exp) { this.exp = Math.min(this.maxHp, exp); }
 }
 
