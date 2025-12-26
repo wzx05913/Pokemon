@@ -1,5 +1,6 @@
 package pokemon;
 
+import javax.lang.model.element.Name;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -116,5 +117,11 @@ public abstract class Pokemon {
     // Setters
     public void setHp(int hp) { this.hp = Math.min(hp, maxHp); }
     public void setExp(int exp) { this.exp = Math.min(this.maxHp, exp); }
+    public String getType(){return name;}
+    public void setType(String name) { this.name = name; }
+
+    public void setAttack(int attack) {
+        this.attack = attack;
+    }
 }
 

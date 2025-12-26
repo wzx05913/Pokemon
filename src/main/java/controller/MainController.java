@@ -163,10 +163,15 @@ public class MainController {
             // 1. 创建Pokemon游戏对象
             Pokemon pokemon = PetFactory.createPokemon(petName, 1);
 
-            newPlayer.addPet(pokemon);
+            // 2. 创建临时Player对象（不存入数据库）
+            Player player = new Player(100, -1); // 初始100金币，id为-1表示临时玩家
 
+            player.addPet(pokemon);
             // 4. 更新会话状态
+            SessionManager sessionManager = SessionManager.getInstance();
+            sessionManager.setCurrentPlayer(player);
             sessionManager.setCurrentPokemon(pokemon);
+            sessionManager.addPokemon(pokemon);
 
             System.out.println("宠物创建成功！");
             System.out.println("宠物名称: " + pokemon.getName());

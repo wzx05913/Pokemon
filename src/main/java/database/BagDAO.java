@@ -74,4 +74,24 @@ public class BagDAO {
             stmt.executeUpdate();
         }
     }
+    public void deleteBagByUserId(int userId) throws SQLException {
+        String sql = "DELETE FROM bag WHERE UserID = ?";
+
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+    public void deleteBag(int bagId) throws SQLException {
+        String sql = "DELETE FROM bag WHERE BagID = ?";
+
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, bagId);
+            stmt.executeUpdate();
+        }
+    }
 }
