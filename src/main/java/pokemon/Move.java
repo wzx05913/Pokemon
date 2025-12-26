@@ -2,15 +2,13 @@ package pokemon;
 
 public class Move {
     private String name;
-    private int power;  // 威力
-    private int pp;     // 使用次数
-    private int maxPP;
+    private int power;  // 技能威力
+    private int ppCost; // 使用该技能消耗的PP值
 
-    public Move(String name, int power, int maxPP) {
+    public Move(String name, int power, int ppCost) {
         this.name = name;
         this.power = power;
-        this.maxPP = maxPP;
-        this.pp = maxPP;
+        this.ppCost = ppCost;
     }
 
     // 计算伤害（简化公式）
@@ -20,23 +18,11 @@ public class Move {
         return Math.max(1, damage);  // 至少造成1点伤害
     }
 
-    public boolean canUse() {
-        return pp > 0;
-    }
 
-    public void use() {
-        if (pp > 0) {
-            pp--;
-        }
-    }
 
-    public void restore() {
-        pp = maxPP;
-    }
-
-    // Getters
+    // Getters and Setters
     public String getName() { return name; }
     public int getPower() { return power; }
-    public int getPP() { return pp; }
-    public int getMaxPP() { return maxPP; }
+    public int getPpCost() { return ppCost; }
+
 }

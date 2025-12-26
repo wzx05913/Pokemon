@@ -13,7 +13,9 @@ public abstract class Pokemon {
     protected int defense;     // 防御力
     protected int exp;         // 当前经验值
     protected int expToNextLevel; // 升级所需经验
-
+    protected int maxPp;  // 最大PP值
+    protected int pp;     // 当前PP值
+    
     // 技能列表
     protected List<Move> moves = new ArrayList<>();
 
@@ -25,6 +27,8 @@ public abstract class Pokemon {
         initializeMoves(); // 初始化技能
         this.exp = 0;
         this.expToNextLevel = calculateExpToNextLevel();
+        this.maxPp = 100;  // 固定最大PP为100
+        this.pp = maxPp;   // 初始PP为最大值
     }
 
     // 抽象方法 - 子类必须实现
@@ -70,17 +74,38 @@ public abstract class Pokemon {
 
         System.out.println(name + " 升到了 " + level + " 级！");
     }
+    
+    // 恢复PP（每次出场恢复20点）
+    public void restorePpOnEnter() {
+        this.pp = Math.min(maxPp, this.pp + 20);
+    }
+    
 
-    // 使用技能
+    // 使用技能（带PP检查和消耗）
     public void useMove(int moveIndex, Pokemon target) {
         if (moveIndex >= 0 && moveIndex < moves.size()) {
             Move move = moves.get(moveIndex);
-            int damage = move.calculateDamage(this.attack, target.defense);
-            target.takeDamage(damage);
-            System.out.println(name + " 使用了 " + move.getName() + "，造成了 " + damage + " 点伤害！");
+            // 检查PP是否足够
+            if (pp >= move.getPpCost()) {
+                pp -= move.getPpCost();
+                int damage = move.calculateDamage(this.attack, target.defense);
+                target.takeDamage(damage);
+                System.out.println(name + " 使用了 " + move.getName() + "，造成了 " + damage + " 点伤害！");
+            } else {
+                System.out.println(name + " 的PP不足，无法使用 " + move.getName() + "！");
+            }
         }
     }
 
+    // 检查是否PP耗尽（所有技能都无法使用）
+    public boolean isPpDepleted() {
+        for (Move move : moves) {
+            if (pp >= move.getPpCost()) {
+                return false; // 还有可用技能
+            }
+        }
+        return true;
+    }
     // 是否濒死
     public boolean isFainted() {
         return hp <= 0;
@@ -101,7 +126,19 @@ public abstract class Pokemon {
         }
         return sb.toString();
     }
+    
+    // 添加PP相关的getter和setter（补充完整性）
+    public int getMaxPp() {
+        return maxPp;
+    }
 
+    public int getPp() {
+        return pp;
+    }
+
+    public void setPp(int pp) {
+        this.pp = Math.min(pp, maxPp); // 确保不超过最大值
+    }
     // Getters
     public String getName() { return name; }
     public int getLevel() { return level; }
