@@ -1,12 +1,16 @@
 package controller;
 
+import java.io.IOException;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.Node;
+import javafx.stage.Stage;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
-import javafx.stage.Stage;
-import javafx.scene.Scene;
-import javafx.scene.Parent;
-import javafx.fxml.FXMLLoader;
 
 public class BedroomSelectController {
 
@@ -51,27 +55,22 @@ public class BedroomSelectController {
 
     // 外出按钮点击事件
     @FXML
-    private void onOutButtonClick() {
+    private void onOutButtonClick(ActionEvent event) {
         System.out.println("外出按钮被点击");
-
         try {
-            // 加载外出地图界面
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/map.fxml"));
-            Parent mapRoot = loader.load();
-
-            // 获取当前舞台
-            Stage currentStage = (Stage) outButton.getScene().getWindow();
-
-            // 设置新场景
-            Scene scene = new Scene(mapRoot, 800, 600);
-            currentStage.setScene(scene);
-            currentStage.setTitle("外出地图");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("错误", "无法加载外出地图：" + e.getMessage());
-        }
-    }
+        	// 从事件对象中获取目标组件
+            Stage currentStage = (Stage) ((javafx.scene.Node) event.getTarget()).getScene().getWindow();        	
+        	// 加载迷宫界面
+        	FXMLLoader loader = new FXMLLoader(getClass().getResource("/maze.fxml"));
+        	Parent mazeRoot = loader.load();
+        	
+        	MazeController mazeController = loader.getController();
+        	mazeController.setPrimaryStage(currentStage);
+        	currentStage.setScene(new Scene(mazeRoot, 800, 600));
+            } catch (IOException e) {
+                e.printStackTrace();
+		}
+	}
 
     // 商店按钮点击事件
     @FXML

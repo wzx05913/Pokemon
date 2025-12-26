@@ -109,8 +109,8 @@ public class SaveLoadController {
         if (selected != null) {
             // 保存游戏
             selected.setSaveTime(LocalDateTime.now());
-            selected.setPlayerName(sessionManager.getCurrentUser() != null ?
-                    sessionManager.getCurrentUser().getUsername() : "玩家");
+            //selected.setPlayerName(sessionManager.getCurrentUser() != null ?
+            //        sessionManager.getCurrentUser().getUserId() : "玩家");
             selected.setPlayTime("1小时"); // 实际应该计算
 
             // 刷新显示
