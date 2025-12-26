@@ -1,6 +1,6 @@
 // MainController.java
 package controller;
-
+import javafx.scene.input.MouseEvent;
 import Player.Player;
 import service.SessionManager;
 import service.PetFactory;
@@ -16,6 +16,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
 import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -28,6 +29,7 @@ import javafx.util.Duration;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.HashMap;
+
 
 public class MainController {
 
@@ -50,12 +52,42 @@ public class MainController {
                 loadPage("select", "/select.fxml");
                 loadPage("main1", "/bedroom.fxml");
                 loadPage("hint", "/bedroom-hint.fxml");
+                loadPage("main", "/bedroom-select.fxml");
 
                 System.out.println("初始化完成");
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            // 将事件过滤器移到外面
         }
+
+        // 在这里注册事件过滤器
+        container.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            if (!container.getChildren().isEmpty()) {
+                Node currentNode = container.getChildren().get(0);
+
+                // 使用页面名称比较
+                String currentPageName = getCurrentPageName(currentNode);
+                System.out.println("当前页面: " + currentPageName);
+
+                if ("main1".equals(currentPageName)) {
+                    System.out.println("捕获到main1页面点击，位置: " + e.getSceneX() + "," + e.getSceneY());
+                    switchToPageWithFade("hint");
+                    e.consume();
+                }
+            }
+        });
+    }
+
+    // 添加辅助方法获取当前页面名称
+    private String getCurrentPageName(Node node) {
+        for (Map.Entry<String, Parent> entry : pages.entrySet()) {
+            if (entry.getValue() == node) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     // 继续游戏按钮
@@ -81,18 +113,38 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent page = loader.load();
 
-            // 为select页面设置控制器
-            if ("select".equals(name)) {
-                SelectController selectController = loader.getController();
-                // 可以传递MainController实例
-                selectController.setMainController(this);
-            }
+            // 获取控制器
+            Object controller = loader.getController();
 
-            // 设置点击事件切换页面
+            if ("select".equals(name)) {
+                SelectController selectController = (SelectController) controller;
+                selectController.setMainController(this);
+            } else if ("hint".equals(name)) {
+                // 为hint页面设置控制器
+                if (controller instanceof BedroomHintController) {
+                    BedroomHintController hintController = (BedroomHintController) controller;
+                    hintController.setMainController(this);
+                    System.out.println("BedroomHintController设置成功");
+                }
+            }else if ("main".equals(name)) {  // 注意：这里是"main"，对应bedroom-select
+                if (controller instanceof BedroomSelectController) {
+                    BedroomSelectController selectController = (BedroomSelectController) controller;
+                    selectController.setMainController(this);
+                    System.out.println("BedroomSelectController设置成功");
+                } else {
+                    System.out.println("警告: bedroom-select页面的控制器类型不正确");
+                }
+            }
             if ("dialog1".equals(name)) {
-                page.setOnMouseClicked(event -> switchToPageWithFade("dialog2"));
+                page.setOnMouseClicked(event -> {
+                    System.out.println("dialog1被点击");
+                    switchToPage("dialog2");
+                });
             } else if ("dialog2".equals(name)) {
-                page.setOnMouseClicked(event -> switchToPageWithFade("select"));
+                page.setOnMouseClicked(event -> {
+                    System.out.println("dialog2被点击");
+                    switchToPage("select");
+                });
             }
 
             pages.put(name, page);
@@ -151,7 +203,7 @@ public class MainController {
         alert.showAndWait();
     }
 
-    private void switchToPage(String pageName) {
+    void switchToPage(String pageName) {
         if (pages.containsKey(pageName)) {
             container.getChildren().clear();
             container.getChildren().add(pages.get(pageName));
@@ -161,7 +213,7 @@ public class MainController {
         }
     }
 
-    private void switchToPageWithFade(String pageName) {
+    void switchToPageWithFade(String pageName) {
         if (pages.containsKey(pageName) && !container.getChildren().isEmpty()) {
             Parent newPage = pages.get(pageName);
             Node currentPageNode = container.getChildren().get(0);
@@ -211,7 +263,7 @@ public class MainController {
     }
     // 返回主菜单
     @FXML
-    private void backToMain() {
+    void backToMain() {
         System.out.println("返回主菜单");
         // 不需要加载main.fxml，因为已经在容器中
         if (!container.getChildren().isEmpty()) {

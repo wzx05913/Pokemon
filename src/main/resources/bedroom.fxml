@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" >
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
 
     <children>
       <ImageView fitHeight="600.0" fitWidth="800.0" pickOnBounds="true" preserveRatio="true">
@@ -25,7 +25,7 @@
                 <Font name="Bodoni MT Bold" size="32.0" />
             </font>
         </Label>
-        <Label layoutX="115.0" layoutY="471.0" prefHeight="54.0" prefWidth="586.0" text="这里是我的房间。" textAlignment="CENTER">
+        <Label layoutX="115.0" layoutY="471.0" prefHeight="92.0" prefWidth="586.0" text="这里是我的房间。看来是时候做好准备，开始宝可梦&#10;大师之旅了！">
             <font>
                 <Font name="Bodoni MT Bold" size="24.0" />
             </font>

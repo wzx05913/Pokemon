@@ -7,8 +7,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BedroomHintController">
     <children>
         <ImageView fitHeight="600.0" fitWidth="800.0" pickOnBounds="true" preserveRatio="true">
             <image>
@@ -47,7 +46,7 @@
       <Label layoutX="431.0" layoutY="290.0" prefHeight="65.0" prefWidth="108.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 5px 15px; -fx-font-weight: bold; -fx-alignment: center; }: ;" text="外出地图，挑战和捕捉其他宝可梦" wrapText="true" />
       <Label layoutX="666.0" layoutY="74.0" prefHeight="65.0" prefWidth="108.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 5px 15px; -fx-font-weight: bold; -fx-alignment: center; }: ;" text="这里购买宝可梦道具" wrapText="true" />
       <Label layoutX="600.0" layoutY="382.0" prefHeight="65.0" prefWidth="108.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 5px 15px; -fx-font-weight: bold; -fx-alignment: center; }: ;" text="管理和照顾你的宠物" wrapText="true" />
-      <Button layoutX="346.0" layoutY="472.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="108.0" style="-fx-background-color: white; -fx-border-color: blue; -fx-border-width: 3px; -fx-text-fill: black; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="我清楚了">
+      <Button onAction="#onConfirmButtonClick" layoutX="346.0" layoutY="472.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="108.0" style="-fx-background-color: white; -fx-border-color: blue; -fx-border-width: 3px; -fx-text-fill: black; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="我清楚了">
          <font>
             <Font name="Ark Pixel" size="12.0" />
          </font>

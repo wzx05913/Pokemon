@@ -51,6 +51,6 @@ public class Player {
 
     @Override
     public String toString() {
-        return "Player{name='" + name + "', id=" + id + ", money=" + money + ", pets=" + pets.size() + "}";
+        return "Player{ id=" + id + ", money=" + money + ", pets=" + pets.size() + "}";
     }
 }
