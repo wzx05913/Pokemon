@@ -9,6 +9,10 @@ import database.PetDAO;
 import entity.User;
 import entity.Pet;
 import pokemon.Pokemon;
+import service.GameDataManager;
+import pokemon.PokemonFactory;
+
+
 import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,13 +22,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
-import javafx.animation.FadeTransition;
 import javafx.util.Duration;
 import java.sql.SQLException;
 import java.util.Map;
@@ -159,10 +159,13 @@ public class MainController {
     public void selectPet(String petName) {
         try {
             Player newPlayer = new Player();
-
+            int userId=1;//暂时默认覆盖存档一
             // 1. 创建Pokemon游戏对象
             Pokemon pokemon = PetFactory.createPokemon(petName, 1);
-
+            
+            Pet petEntity = PokemonFactory.convertToEntity(pokemon, userId);
+            GameDataManager.getInstance().addPet(petEntity);
+            
             newPlayer.addPet(pokemon);
 
             // 4. 更新会话状态

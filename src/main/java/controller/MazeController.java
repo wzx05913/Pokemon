@@ -1,6 +1,8 @@
 // src/main/java/controller/MazeController.java
 package controller;
-
+import service.GameDataManager;
+import entity.Bag;
+import entity.Pet;
 import core.Maze;
 import core.Point;
 import Player.MazePlayer;
@@ -10,6 +12,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import java.lang.Exception; 
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -88,6 +93,7 @@ public class MazeController {
             
             // 检查是否到达终点
             if (maze.isEnd(newX, newY)) {
+            	
                 goBackToMain();
                 return;
             }
@@ -130,19 +136,35 @@ public class MazeController {
     }
 
     private void openFightingWindow() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fighting.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Fighting");
-            stage.setScene(new Scene(root, 400, 300));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
+    	try {
+            // 获取当前用户的背包
+            
+            // 创建战斗窗口并显示
+            BattleController battleController = new BattleController(
+            	GameDataManager.getInstance().getPetList(), 
+            	GameDataManager.getInstance().getPlayerBag(),
+                this::onBattleEnd
+            );
+            Stage battleStage = new Stage();
+            battleStage.setTitle("宝可梦对战");
+            battleStage.initModality(Modality.APPLICATION_MODAL);
+            battleStage.setScene(new Scene(battleController.getRoot()));
+            battleStage.show();
+        } catch (Exception e) {
+            showAlert("错误", "无法启动战斗: " + e.getMessage());
         }
     }
 
-    private void goBackToMain() {
+    private void showAlert(String title, String content) {
+        // 创建 Alert 弹窗（JavaFX 自带）
+        Alert alert = new Alert(AlertType.ERROR); // ERROR 类型弹窗
+        alert.setTitle(title); // 设置弹窗标题
+        alert.setHeaderText(null); // 隐藏头部文本（可选）
+        alert.setContentText(content); // 设置弹窗内容
+        alert.showAndWait(); // 显示弹窗并等待用户关闭
+    }
+
+	private void goBackToMain() {
         if (primaryStage != null) {
             try {
                 Parent mainRoot = FXMLLoader.load(getClass().getResource("/main.fxml"));
@@ -155,5 +177,24 @@ public class MazeController {
 
     public void setPrimaryStage(Stage stage) {
         this.primaryStage = stage;
+    }
+    
+    private void onBattleEnd(boolean playerWon, int coinsEarned, Pet newPet) {
+        try {
+            if (playerWon) {
+            	GameDataManager.getInstance().setCoins(coinsEarned);
+                
+                if (newPet != null) {
+                	GameDataManager.getInstance().addPet(newPet);
+                    showAlert("恭喜", "你获得了新宠物: " + newPet.getName());
+                }
+                showAlert("胜利", "你赢得了战斗，获得了" + coinsEarned + "金币！");
+            } else {
+                showAlert("失败", "你输掉了战斗！");
+            }
+
+        } catch (Exception e) {
+            showAlert("错误", "战斗结果处理失败: " + e.getMessage());
+        }
     }
 }
