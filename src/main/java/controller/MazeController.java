@@ -18,8 +18,11 @@ import java.lang.Exception;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
+import controller.BattleController;
+import javafx.stage.Modality;
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * 迷宫游戏控制器
@@ -136,22 +139,37 @@ public class MazeController {
     }
 
     private void openFightingWindow() {
-    	try {
-            // 获取当前用户的背包
+        try {
+            // 1. 加载FXML文件（关键修复：正确设置FXML路径）
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/battleView.fxml"));
+
             
-            // 创建战斗窗口并显示
-            BattleController battleController = new BattleController(
-            	GameDataManager.getInstance().getPetList(), 
-            	GameDataManager.getInstance().getPlayerBag(),
-                this::onBattleEnd
-            );
+            Parent battleRoot = loader.load(); // 此时会触发 BattleController 的默认构造函数
+            
+            // 获取由 FXMLLoader 创建的控制器实例
+            BattleController controller = loader.getController();
+            
+            // 如果你需要传递数据，在 BattleController 中增加一个 setupData 方法，而不是写在构造函数里
+            List<Pet> petList = GameDataManager.getInstance().getPetList();
+            controller.setupBattle(new ArrayList<>(petList), this::onBattleEnd);
+
             Stage battleStage = new Stage();
-            battleStage.setTitle("宝可梦对战");
-            battleStage.initModality(Modality.APPLICATION_MODAL);
-            battleStage.setScene(new Scene(battleController.getRoot()));
+            battleStage.setScene(new Scene(battleRoot));
             battleStage.show();
+            
+        } catch (IOException e) {
+            // 更详细的错误提示，帮助定位问题
+            String errorMsg = "无法启动战斗: ";
+            if (e.getMessage().contains("Location is not set")) {
+                errorMsg += "FXML文件路径错误，请检查battleView.fxml是否存在于指定路径";
+            } else {
+                errorMsg += e.getMessage();
+            }
+            showAlert("错误", errorMsg);
+            e.printStackTrace(); // 控制台输出详细堆栈，便于调试
         } catch (Exception e) {
-            showAlert("错误", "无法启动战斗: " + e.getMessage());
+            showAlert("错误", "战斗初始化失败: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -179,22 +197,17 @@ public class MazeController {
         this.primaryStage = stage;
     }
     
-    private void onBattleEnd(boolean playerWon, int coinsEarned, Pet newPet) {
+    private void onBattleEnd(Boolean isPlayerWin) {
         try {
-            if (playerWon) {
-            	GameDataManager.getInstance().setCoins(coinsEarned);
-                
-                if (newPet != null) {
-                	GameDataManager.getInstance().addPet(newPet);
-                    showAlert("恭喜", "你获得了新宠物: " + newPet.getName());
-                }
-                showAlert("胜利", "你赢得了战斗，获得了" + coinsEarned + "金币！");
-            } else {
-                showAlert("失败", "你输掉了战斗！");
+            if (isPlayerWin) {
+            	
             }
-
         } catch (Exception e) {
             showAlert("错误", "战斗结果处理失败: " + e.getMessage());
         }
-    }
+    
+    }        
+
+
+                
 }

@@ -75,8 +75,7 @@ public class Maze {
 
     private void placeTreasures() {
         Random random = new Random();
-        int treasureCount = 10 + random.nextInt(5); // 3-7个橙黄色点
-
+        int treasureCount = 30 + random.nextInt(5); // 宝藏个数
         for (int i = 0; i < treasureCount; i++) {
             int x, y;
             do {

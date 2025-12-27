@@ -17,12 +17,16 @@ public class GameDataManager {
     
     // 全局背包
     private Bag playerBag;
-    
+    private int curUser = 0; // 默认用户ID为0    
     private GameDataManager() {
         // 初始化容器
         petList = new ArrayList<>();
     }
-    
+    // 初始化新游戏数据
+    public void initNewGame() {
+        petList = new ArrayList<>();
+        playerBag = new Bag(curUser); // 使用当前用户ID初始化背包
+    }
     public static synchronized GameDataManager getInstance() {
         if (instance == null) {
             instance = new GameDataManager();
@@ -47,6 +51,7 @@ public class GameDataManager {
     public void setCoins(int coins) {
     	playerBag.setCoins(coins);
     }
+    
     public Bag getPlayerBag() {
         return playerBag;
     }
@@ -54,7 +59,13 @@ public class GameDataManager {
     public void setPlayerBag(Bag bag) {
         this.playerBag = bag;
     }
-    
+    //当前用户
+    public int getCurUser() {
+    	return curUser; 
+    }
+    public void setCurUser(int curUser) {
+    	this.curUser=curUser;
+    }
     // 重置数据（切换用户或新游戏时使用）
     public void reset() {
         petList.clear();
