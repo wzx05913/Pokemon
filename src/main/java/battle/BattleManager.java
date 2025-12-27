@@ -42,47 +42,47 @@ public class BattleManager {
                 .map(PokemonFactory::createPokemon)
                 .sorted((p1, p2) -> Integer.compare(p2.getLevel(), p1.getLevel()))
                 .collect(Collectors.toList());
-        
+
         playerQueue.addAll(playerPokemons);
-        
+
         // 初始化敌人
         initEnemy(playerPokemons);
-        
+
         // 战斗开始时所有宠物满状态
         playerQueue.forEach(p -> {
             p.fullHeal();
             p.setPp(p.getMaxPp());
         });
-        
+
         isPlayerTurn = true;
         currentPlayerPokemon = playerQueue.peek();
         currentEnemyPokemon = enemyQueue.peek();
     }
-    
+
     // 初始化敌人
     private void initEnemy(List<Pokemon> playerPokemons) {
         enemyQueue = new LinkedList<>();
         int enemyLevel;
-        
+
         if (playerPokemons.size() == 1) {
             enemyLevel = playerPokemons.get(0).getLevel() - 1;
         } else {
             int maxLevel = playerPokemons.get(0).getLevel();
             enemyLevel = maxLevel + random.nextInt(3) + 2; // 2-4级
         }
-        
+
         // 确保等级至少为1
         enemyLevel = Math.max(1, enemyLevel);
-        
+
         // 随机选择一种宝可梦类型
         PokemonType[] types = PokemonType.values();
         PokemonType randomType = types[random.nextInt(types.length)];
-        
+
         // 创建敌人宝可梦
         Pokemon enemy = createEnemyPokemon(String.valueOf(randomType), enemyLevel);
         enemyQueue.add(enemy);
     }
-    
+
     // 创建敌人宝可梦
     private Pokemon createEnemyPokemon(String type, int level) {
         switch (type) {
@@ -102,28 +102,28 @@ public class BattleManager {
                 return new Pikachu(level); // 默认皮卡丘
         }
     }
-    
+
     // 玩家使用技能
     public BattleStepResult playerUseMove(int moveIndex) {
         if (!isPlayerTurn || currentPlayerPokemon == null) {
             return new BattleStepResult(false, "不是你的回合");
         }
-        
+
         List<Move> moves = currentPlayerPokemon.getMoves();
         if (moveIndex < 0 || moveIndex >= moves.size()) {
             return new BattleStepResult(false, "无效的技能");
         }
-        
+
         Move move = moves.get(moveIndex);
         if (currentPlayerPokemon.getPp() < move.getPpCost()) {
             return new BattleStepResult(false, "PP不足，无法使用技能");
         }
-        
+
         // 使用技能
         currentPlayerPokemon.useMove(moveIndex, currentEnemyPokemon);
-        String message = currentPlayerPokemon.getName() + "使用了" + move.getName() 
+        String message = currentPlayerPokemon.getName() + "使用了" + move.getName()
                 + "，造成了" + (currentEnemyPokemon.getMaxHp() - currentEnemyPokemon.getHp()) + "点伤害";
-        
+
         // 检查敌人是否被击败
         if (currentEnemyPokemon.isFainted()) {
             message += "\n敌人的" + currentEnemyPokemon.getName() + "被击败了！";
@@ -132,40 +132,40 @@ public class BattleManager {
             enemyQueue.poll();
             currentEnemyPokemon = enemyQueue.peek();
         }
-        
+
         isPlayerTurn = false;
         return new BattleStepResult(true, message);
     }
-    
+
     // 敌人使用技能
     public BattleStepResult enemyUseMove() {
         if (isPlayerTurn || currentEnemyPokemon == null) {
             return new BattleStepResult(false, "不是敌人的回合");
         }
-        
+
         // 选择伤害最高的可用技能
         List<Move> moves = currentEnemyPokemon.getMoves();
         Move bestMove = null;
-        
+
         for (Move move : moves) {
-            if (currentEnemyPokemon.getPp() >= move.getPpCost() && 
-                (bestMove == null || move.getPower() > bestMove.getPower())) {
+            if (currentEnemyPokemon.getPp() >= move.getPpCost() &&
+                    (bestMove == null || move.getPower() > bestMove.getPower())) {
                 bestMove = move;
             }
         }
-        
+
         if (bestMove == null) {
             // 没有可用技能
             isPlayerTurn = true;
             return new BattleStepResult(true, "敌人没有可用技能了");
         }
-        
+
         // 使用技能
         int moveIndex = moves.indexOf(bestMove);
         currentEnemyPokemon.useMove(moveIndex, currentPlayerPokemon);
         String message = "敌人的" + currentEnemyPokemon.getName() + "使用了" + bestMove.getName()
                 + "，造成了" + (currentPlayerPokemon.getMaxHp() - currentPlayerPokemon.getHp()) + "点伤害";
-        
+
         // 检查玩家宠物是否被击败
         if (currentPlayerPokemon.isFainted()) {
             message += "\n你的" + currentPlayerPokemon.getName() + "战死了！";
@@ -178,31 +178,31 @@ public class BattleManager {
             playerQueue.poll();
             playerQueue.add(currentPlayerPokemon);
         }
-        
+
         // 敌人移到队尾
         if (!currentEnemyPokemon.isFainted() && !currentEnemyPokemon.isPpDepleted()) {
             enemyQueue.poll();
             enemyQueue.add(currentEnemyPokemon);
         }
-        
+
         // 更新当前战斗宠物
         currentPlayerPokemon = playerQueue.peek();
         currentEnemyPokemon = enemyQueue.peek();
-        
+
         isPlayerTurn = true;
         return new BattleStepResult(true, message);
     }
-    
+
     // 检查战斗是否结束
     public boolean isBattleEnded() {
         boolean playerHasValid = playerQueue.stream().anyMatch(p -> !p.isFainted() && !p.isPpDepleted());
         boolean enemyHasValid = enemyQueue.stream().anyMatch(p -> !p.isFainted() && !p.isPpDepleted());
-        
+
         if (!playerHasValid) {
             battleResult = BattleResult.ENEMY_WIN;
             return true;
         }
-        
+
         if (!enemyHasValid) {
             battleResult = BattleResult.PLAYER_WIN;
             GameDataManager g = GameDataManager.getInstance();
@@ -213,10 +213,10 @@ public class BattleManager {
             }
             return true;
         }
-        
+
         return false;
     }
-    
+
     // 尝试捕获敌人
     public boolean tryCatchEnemy() {
         // 只有玩家胜利后可以捕获
@@ -279,6 +279,9 @@ public class BattleManager {
     public Pokemon getCurrentEnemyPokemon() { return currentEnemyPokemon; }
     public BattleResult getBattleResult() { return battleResult; }
     public boolean isPlayerTurn() { return isPlayerTurn; }
+
+    // 新增：获取最近被击败的敌人（用于界面显示HP=0）
+    public Pokemon getLastDefeatedEnemy() { return lastDefeatedEnemy; }
 }
 
 
