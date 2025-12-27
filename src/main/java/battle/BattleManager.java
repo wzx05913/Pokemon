@@ -1,11 +1,19 @@
 // battle/BattleManager.java
 package battle;
 import java.util.ArrayList;
-
-import pokemon.*;
+import pokemon.Pokemon;
+import pokemon.PokemonFactory;
+import pokemon.PokemonType;
 import entity.Pet;
 import entity.Bag;
 import Player.Player;
+import pokemon.Bulbasaur;
+import pokemon.Charmander;
+import pokemon.Jigglypuff;
+import pokemon.Pikachu;
+import pokemon.Psyduck;
+import pokemon.Squirtle;
+import pokemon.Move;
 import service.GameDataManager;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,6 +32,7 @@ public class BattleManager {
     private boolean isPlayerTurn;
     private Random random = new Random();
     private BattleResult battleResult;
+    private Pokemon lastDefeatedEnemy; // 最近被击败的敌人，用于战后捕捉
 
     // 初始化战斗
     public void initBattle(List<Pet> petList) {
@@ -118,7 +127,10 @@ public class BattleManager {
         // 检查敌人是否被击败
         if (currentEnemyPokemon.isFainted()) {
             message += "\n敌人的" + currentEnemyPokemon.getName() + "被击败了！";
+            // 记录最近被击败的敌人，供战后捕获使用
+            lastDefeatedEnemy = currentEnemyPokemon;
             enemyQueue.poll();
+            currentEnemyPokemon = enemyQueue.peek();
         }
         
         isPlayerTurn = false;
@@ -193,8 +205,12 @@ public class BattleManager {
         
         if (!enemyHasValid) {
             battleResult = BattleResult.PLAYER_WIN;
-            // 增加金币
-            GameDataManager.getInstance().setCoins(GameDataManager.getInstance().getPlayerBag().getCoins()+30);
+            GameDataManager g = GameDataManager.getInstance();
+            // 增加金币（更新Bag并同步到当前Player）
+            g.addCoins(30);
+            if (g.getCurrentPlayer() != null) {
+                g.getCurrentPlayer().setMoney(g.getPlayerBag().getCoins());
+            }
             return true;
         }
         
@@ -203,30 +219,55 @@ public class BattleManager {
     
     // 尝试捕获敌人
     public boolean tryCatchEnemy() {
-    	if (battleResult != BattleResult.PLAYER_WIN || enemyQueue.isEmpty()) {
+        // 只有玩家胜利后可以捕获
+        if (battleResult != BattleResult.PLAYER_WIN) {
             return false;
         }
-        
-        // 30%概率捕获
-        if (random.nextDouble() <= 1.0) {
-            // 创建与敌人同类型同等级的新宠物
-            Pokemon enemy = enemyQueue.peek();
-            Pet newPet = new Pet();
-            
-            // 设置新宠物属性
-            newPet.setUserId(GameDataManager.getInstance().getCurUser());
-            newPet.setName(enemy.getName());
-            newPet.setType(enemy.getName());
-            newPet.setLevel(enemy.getLevel());
-            newPet.setAttack(enemy.getAttack());
-            newPet.setExperience(0);
-            newPet.setAlive(true);
-            
-            // 添加到全局管理类而非SessionManager
-            System.out.println("DEBUG: Capture successful! Adding new pet now: " + enemy.getName());
+
+        // 捕获目标优先为最近被击败的敌人
+        Pokemon enemy = lastDefeatedEnemy != null ? lastDefeatedEnemy : currentEnemyPokemon;
+        if (enemy == null) return false;
+
+        // 30% 概率捕获
+        if (random.nextDouble() <= 0.3) {
+            int userId = GameDataManager.getInstance().getCurrentUserId();
+
+            // 使用 PetFactory 创建实体并保存到数据库（如果需要）以及内存
+            entity.Pet newPet = service.PetFactory.createPetEntity(userId, enemy);
+
+            userId = GameDataManager.getInstance().getCurrentUserId();
+            if (userId > 0) {
+                try {
+                    database.PetDAO petDAO = new database.PetDAO();
+                    petDAO.createPet(newPet);
+                } catch (java.sql.SQLException e) {
+                    System.err.println("捕获后保存到数据库失败: " + e.getMessage());
+                }
+            } else {
+                // 临时玩家，不写数据库，仅更新内存
+            }
+
+            // 更新全局内存列表
+            GameDataManager.getInstance().getPetList().add(newPet);
+
+            // 同步到当前Player对象（如果存在）
+            if (GameDataManager.getInstance().getCurrentPlayer() != null) {
+                try {
+                    pokemon.Pokemon created = service.PetFactory.createPokemon(newPet);
+                    if (created != null) {
+                        GameDataManager.getInstance().getCurrentPlayer().addPet(created);
+                    }
+                } catch (Exception ex) {
+                    System.err.println("将捕获的宠物加入Player失败: " + ex.getMessage());
+                }
+            }
+
+            // 清理标记
+            lastDefeatedEnemy = null;
+            System.out.println("DEBUG: 捕获成功: " + enemy.getName());
             return true;
         } else {
-            System.out.println("DEBUG: Capture failed (Probability not triggered)");
+            System.out.println("DEBUG: 捕获失败（未触发概率）");
         }
         return false;
     }

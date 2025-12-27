@@ -145,6 +145,11 @@ public class GameDataManager {
         }
     }
     
+    public void addCoins(int coins) {
+    	if (playerBag != null) {
+        	playerBag.setCoins(playerBag.getCoins()+coins);
+        }
+    }
     public int getCurrentUserId() {
         return currentPlayer != null ? currentPlayer.getId() : currentUserId;
     }
