@@ -6,6 +6,7 @@ import pokemon.PokemonFactory;
 import pokemon.PokemonType;
 import entity.Pet;
 import entity.Bag;
+import Player.Player;
 import pokemon.Bulbasaur;
 import pokemon.Charmander;
 import pokemon.Jigglypuff;
@@ -14,7 +15,6 @@ import pokemon.Psyduck;
 import pokemon.Squirtle;
 import pokemon.Move;
 import service.GameDataManager;
-import service.SessionManager;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -211,20 +211,28 @@ public class BattleManager {
     
     // 尝试捕获敌人
     public boolean tryCatchEnemy() {
-        if (battleResult != BattleResult.PLAYER_WIN || enemyQueue.isEmpty()) {
+    	if (battleResult != BattleResult.PLAYER_WIN || enemyQueue.isEmpty()) {
             return false;
         }
         
         // 30%概率捕获
         if (random.nextDouble() <= 0.3) {
-            // 创建1级的新宠物
+            // 创建与敌人同类型同等级的新宠物
             Pokemon enemy = enemyQueue.peek();
-            Pet newPet = new Pet(SessionManager.getInstance().getCurrentUser().getUserId(),
-                    enemy.getName(), PokemonType.fromString(enemy.getName()).getEnglishName(), 1, 
-                    enemy.getAttack());
+            Pet newPet = new Pet();
+            
+            // 设置新宠物属性
+            newPet.setUserId(GameDataManager.getInstance().getCurUser());
+            newPet.setName(enemy.getName());
+            newPet.setType(PokemonType.fromString(enemy.getName()).getEnglishName());
+            newPet.setLevel(enemy.getLevel());
+            newPet.setAttack(enemy.getAttack());
+            newPet.setExperience(0);
             newPet.setAlive(true);
             
+            // 添加到全局管理类而非SessionManager
             GameDataManager.getInstance().addPet(newPet);
+
             return true;
         }
         return false;

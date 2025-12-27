@@ -2,16 +2,17 @@
 package controller;
 import javafx.scene.input.MouseEvent;
 import Player.Player;
-import service.SessionManager;
+
 import service.PetFactory;
 import database.UserDAO;
 import database.PetDAO;
 import entity.User;
 import entity.Pet;
+import entity.Bag;
 import pokemon.Pokemon;
 import service.GameDataManager;
 import pokemon.PokemonFactory;
-
+import database.BagDAO;
 
 import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
@@ -38,8 +39,8 @@ public class MainController {
 
     private Map<String, Parent> pages = new HashMap<>();
     private boolean initialized = false;
-    private SessionManager sessionManager = SessionManager.getInstance();
-
+    private GameDataManager dataManager = GameDataManager.getInstance();
+    
     @FXML
     private void initialize() {
         if (!initialized) {
@@ -157,19 +158,34 @@ public class MainController {
 
     // 选择宠物
     public void selectPet(String petName) {
-        try {
-            Player newPlayer = new Player();
-            int userId=1;//暂时默认覆盖存档一
-            // 1. 创建Pokemon游戏对象
-            Pokemon pokemon = PetFactory.createPokemon(petName, 1);
+    	try {
+            int userId = 1;
+            Pet pet = new Pet();
+            pet.setName(petName);
+            pet.setLevel(1);
+            Pokemon pokemon = PokemonFactory.createPokemon(pet);
             
             Pet petEntity = PokemonFactory.convertToEntity(pokemon, userId);
             GameDataManager.getInstance().addPet(petEntity);
             
-            newPlayer.addPet(pokemon);
-
-            // 4. 更新会话状态
-            sessionManager.setCurrentPokemon(pokemon);
+            Player player = new Player(100, userId);
+            player.addPet(pokemon);
+            
+            GameDataManager gameDataManager = GameDataManager.getInstance();
+            
+            // 使用GameDataManager替代SessionManager
+            gameDataManager.setCurrentPlayer(player,false);
+            gameDataManager.setCurrentPokemon(pokemon);
+            gameDataManager.addPokemon(pokemon);
+            gameDataManager.setCurrentUserId(userId);
+            
+            BagDAO bagDAO = new BagDAO();
+            Bag userBag = bagDAO.getBagByUserId(userId);
+            if (userBag == null) {
+                userBag = new Bag(userId);
+                bagDAO.createBag(userBag);
+            }
+            gameDataManager.setCurrentBag(userBag);
 
             System.out.println("宠物创建成功！");
             System.out.println("宠物名称: " + pokemon.getName());
@@ -177,7 +193,6 @@ public class MainController {
             System.out.println("宠物攻击力: " + pokemon.getAttack());
             System.out.println("最大HP: " + pokemon.getMaxHp());
 
-            // 5. 显示创建成功消息
             showSuccessAlert(petName);
 
         } catch (Exception e) {

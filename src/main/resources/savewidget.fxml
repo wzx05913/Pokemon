@@ -34,7 +34,8 @@
         </Label>
 
         <!-- 存档列表 -->
-        <ListView fx:id="saveList" prefHeight="242.0" prefWidth="379.0" style="-fx-background-color: rgba(255, 255, 255, 0.3);                        -fx-control-inner-background: rgba(255, 255, 255, 0.3);                        -fx-border-color: rgba(52, 152, 219, 0.5);                        -fx-border-width: 2;                        -fx-border-radius: 5;">
+        <ListView fx:id="saveList" prefHeight="242.0" prefWidth="360.0" style="-fx-background-color: rgba(255, 255, 255, 0.3);                        -fx-control-inner-background: rgba(255, 255, 255, 0.3);                        -fx-border-color: rgba(52, 152, 219, 0.5);                        -fx-border-width: 2;                        -fx-border-radius: 5;">
+            <orientation>HORIZONTAL</orientation>
         </ListView>
 
         <!-- 按钮区域 -->
@@ -45,21 +46,21 @@
                     <Font name="Ark Pixel" size="10.0" />
                 </font>
             </Button>
-   
+
             <!-- 读取按钮 -->
             <Button fx:id="loadButton" onAction="#onLoadButtonClick" prefHeight="30" prefWidth="80" style="-fx-background-color: #3498db;                         -fx-text-fill: white;                         -fx-background-radius: 5;                         -fx-border-color: #21618c;                         -fx-border-width: 2;                         -fx-font-weight: bold;                         -fx-cursor: hand;" text="读取">
                 <font>
                     <Font name="Ark Pixel" size="10.0" />
                 </font>
             </Button>
-   
+
             <!-- 删除按钮 -->
             <Button fx:id="deleteButton" onAction="#onDeleteButtonClick" prefHeight="30" prefWidth="80" style="-fx-background-color: #e74c3c;                         -fx-text-fill: white;                         -fx-background-radius: 5;                         -fx-border-color: #b03a2e;                         -fx-border-width: 2;                         -fx-font-weight: bold;                         -fx-cursor: hand;" text="删除">
                 <font>
                     <Font name="Ark Pixel" size="10.0" />
                 </font>
             </Button>
-   
+
             <!-- 关闭按钮 -->
             <Button fx:id="closeButton" onAction="#onCloseButtonClick" prefHeight="30" prefWidth="80" style="-fx-background-color: #95a5a6;                         -fx-text-fill: white;                         -fx-background-radius: 5;                         -fx-border-color: #7f8c8d;                         -fx-border-width: 2;                         -fx-font-weight: bold;                         -fx-cursor: hand;" text="关闭">
                 <font>

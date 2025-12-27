@@ -59,7 +59,7 @@ public class DatabaseTest {
         int userId = user.getUserId();
 
         // 测试新增宠物
-        Pet pet = new Pet(userId, "测试小火龙", "Charmander", 1, 22);
+        Pet pet = new Pet(userId, "Charmander", 1, 22);
         pet.setAlive(true);
         petDAO.createPet(pet);
 
