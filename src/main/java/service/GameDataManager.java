@@ -30,6 +30,10 @@ public class GameDataManager {
     
     private GameDataManager() {
         petList = new ArrayList<>();
+        this.playerBag = new Bag();
+        this.playerBag.setBagId(1); // 强制设置初始 ID 为 1
+        this.playerBag.setCoins(100); // 也可以设置初始金币
+        this.currentUserId = 1;
     }
     
     public static synchronized GameDataManager getInstance() {
