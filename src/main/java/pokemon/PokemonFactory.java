@@ -4,26 +4,27 @@ import entity.Pet;
 
 public class PokemonFactory {
     public static Pokemon createPokemon(Pet petEntity) {
-        PokemonType type = PokemonType.fromString(petEntity.getType());
+        String typeStr = petEntity.getType();
+        PokemonType type = PokemonType.valueOf(petEntity.getType());
         Pokemon pokemon;
         
         switch (type) {
-            case BULBASAUR:
+            case 妙蛙种子:
                 pokemon = new Bulbasaur(petEntity.getLevel());
                 break;
-            case CHARMANDER:
+            case 小火龙:
                 pokemon = new Charmander(petEntity.getLevel());
                 break;
-            case SQUIRTLE:
+            case 杰尼龟:
                 pokemon = new Squirtle(petEntity.getLevel());
                 break;
-            case PIKACHU:
+            case 皮卡丘:
                 pokemon = new Pikachu(petEntity.getLevel());
                 break;
-            case JIGGLYPUFF:
+            case 胖丁:
                 pokemon = new Jigglypuff(petEntity.getLevel());
                 break;
-            case PSYDUCK:
+            case 可达鸭:
                 pokemon = new Psyduck(petEntity.getLevel());
                 break;
             default:
@@ -38,8 +39,7 @@ public class PokemonFactory {
     public static Pet convertToEntity(Pokemon pokemon, int userId) {
         Pet pet = new Pet();
         pet.setUserId(userId);
-        pet.setName(pokemon.getName());
-        pet.setType(PokemonType.fromString(pokemon.getName()).getEnglishName());
+        pet.setType(pokemon.getName());
         pet.setLevel(pokemon.getLevel());
         pet.setAttack(pokemon.getAttack());
         pet.setExperience(pokemon.getExp());

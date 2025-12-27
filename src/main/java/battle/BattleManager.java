@@ -1,19 +1,11 @@
 // battle/BattleManager.java
 package battle;
 import java.util.ArrayList;
-import pokemon.Pokemon;
-import pokemon.PokemonFactory;
-import pokemon.PokemonType;
+
+import pokemon.*;
 import entity.Pet;
 import entity.Bag;
 import Player.Player;
-import pokemon.Bulbasaur;
-import pokemon.Charmander;
-import pokemon.Jigglypuff;
-import pokemon.Pikachu;
-import pokemon.Psyduck;
-import pokemon.Squirtle;
-import pokemon.Move;
 import service.GameDataManager;
 import java.util.Collections;
 import java.util.Comparator;
@@ -78,24 +70,24 @@ public class BattleManager {
         PokemonType randomType = types[random.nextInt(types.length)];
         
         // 创建敌人宝可梦
-        Pokemon enemy = createEnemyPokemon(randomType, enemyLevel);
+        Pokemon enemy = createEnemyPokemon(String.valueOf(randomType), enemyLevel);
         enemyQueue.add(enemy);
     }
     
     // 创建敌人宝可梦
-    private Pokemon createEnemyPokemon(PokemonType type, int level) {
+    private Pokemon createEnemyPokemon(String type, int level) {
         switch (type) {
-            case BULBASAUR:
+            case "妙蛙种子":
                 return new Bulbasaur(level);
-            case CHARMANDER:
+            case "小火龙":
                 return new Charmander(level);
-            case SQUIRTLE:
+            case "杰尼龟":
                 return new Squirtle(level);
-            case PIKACHU:
+            case "皮卡丘":
                 return new Pikachu(level);
-            case JIGGLYPUFF:
+            case "胖丁":
                 return new Jigglypuff(level);
-            case PSYDUCK:
+            case "可达鸭":
                 return new Psyduck(level);
             default:
                 return new Pikachu(level); // 默认皮卡丘
@@ -224,7 +216,7 @@ public class BattleManager {
             // 设置新宠物属性
             newPet.setUserId(GameDataManager.getInstance().getCurUser());
             newPet.setName(enemy.getName());
-            newPet.setType(PokemonType.fromString(enemy.getName()).getEnglishName());
+            newPet.setType(enemy.getName());
             newPet.setLevel(enemy.getLevel());
             newPet.setAttack(enemy.getAttack());
             newPet.setExperience(0);

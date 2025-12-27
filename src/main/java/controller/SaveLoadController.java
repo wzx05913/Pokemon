@@ -23,7 +23,7 @@ import javafx.geometry.Pos;
 import Player.Player;
 import pokemon.Pokemon;
 import service.PetFactory;
-
+import service.GameDataManager;
 
 public class SaveLoadController {
 
@@ -388,6 +388,7 @@ public class SaveLoadController {
             showAlert("错误", "玩家ID格式错误", AlertType.ERROR);
         }
     }
+
     private void saveCurrentPlayer(SaveData saveData) throws SQLException {
         // 检查当前玩家是否是临时玩家
         boolean isTemporaryPlayer = currentPlayer.getId() == -1;
@@ -483,6 +484,7 @@ public class SaveLoadController {
 
         showAlert("成功", message + "\n存档位置: " + saveData.getSlot(), AlertType.INFORMATION);
     }
+
     @FXML
     private void onLoadButtonClick() {
         SaveData selectedSave = saveList.getSelectionModel().getSelectedItem();
@@ -545,7 +547,7 @@ public class SaveLoadController {
             // 更新会话状态
             dataManager.setCurrentPlayer(loadedPlayer);
             if (loadedPlayer.hasPets()) {
-            	dataManager.setCurrentPokemon(loadedPlayer.getPets().get(0));
+                dataManager.setCurrentPokemon(loadedPlayer.getPets().get(0));
             }
 
             // 更新当前玩家引用
@@ -614,7 +616,7 @@ public class SaveLoadController {
 
                     // 如果删除的是当前玩家
                     if (currentPlayer != null && currentPlayer.getId() == playerId) {
-                    	dataManager.setCurrentPlayer(null);
+                        dataManager.setCurrentPlayer(null);
                         currentPlayer = null;
                     }
 

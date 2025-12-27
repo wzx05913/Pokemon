@@ -24,7 +24,7 @@ public class PetFactory {
     
     // 根据Pet实体创建Pokemon
     public static Pokemon createPokemon(Pet petEntity) {
-        PokemonType type = PokemonType.fromString(petEntity.getType());
+        PokemonType type = PokemonType.valueOf(petEntity.getName());
         Pokemon pokemon = createPokemonByType(type, petEntity.getLevel());
         pokemon.setHp(petEntity.getLevel() * 1000); // 保持HP设置逻辑
         pokemon.setExp(petEntity.getExperience());
@@ -34,17 +34,17 @@ public class PetFactory {
     // 辅助方法：根据类型和等级创建Pokemon
     private static Pokemon createPokemonByType(PokemonType type, int level) {
         switch (type) {
-            case BULBASAUR:
+            case 妙蛙种子:
                 return new Bulbasaur(level);
-            case CHARMANDER:
+            case 小火龙:
                 return new Charmander(level);
-            case SQUIRTLE:
+            case 杰尼龟:
                 return new Squirtle(level);
-            case PIKACHU:
+            case 皮卡丘:
                 return new Pikachu(level);
-            case JIGGLYPUFF:
+            case 胖丁:
                 return new Jigglypuff(level);
-            case PSYDUCK:
+            case 可达鸭:
                 return new Psyduck(level);
             default:
                 throw new IllegalArgumentException("不支持的宠物类型: " + type);

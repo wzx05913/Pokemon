@@ -159,9 +159,10 @@ public class MainController {
     // 选择宠物
     public void selectPet(String petName) {
     	try {
-            int userId = 1;
+            int userId = -1;
             Pet pet = new Pet();
             pet.setName(petName);
+            pet.setType(petName);
             pet.setLevel(1);
             Pokemon pokemon = PokemonFactory.createPokemon(pet);
             
@@ -172,8 +173,7 @@ public class MainController {
             player.addPet(pokemon);
             
             GameDataManager gameDataManager = GameDataManager.getInstance();
-            
-            // 使用GameDataManager替代SessionManager
+
             gameDataManager.setCurrentPlayer(player,false);
             gameDataManager.setCurrentPokemon(pokemon);
             gameDataManager.addPokemon(pokemon);
@@ -183,7 +183,6 @@ public class MainController {
             Bag userBag = bagDAO.getBagByUserId(userId);
             if (userBag == null) {
                 userBag = new Bag(userId);
-                bagDAO.createBag(userBag);
             }
             gameDataManager.setCurrentBag(userBag);
 
