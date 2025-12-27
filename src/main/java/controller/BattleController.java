@@ -37,6 +37,16 @@ public class BattleController {
     private Parent root;
     private Consumer<Boolean> battleEndCallback;
     
+    public BattleController() {}
+    public void initData(List<Pet> petList, Bag bag, Consumer<Boolean> callback) {
+        this.battleEndCallback = callback;
+        this.battleManager = new BattleManager();
+        this.battleManager.initBattle(petList);
+        
+        updateBattleUI();
+        createMoveButtons();
+        battleLog.setText("战斗开始！");
+    }
     public BattleController(List<Pet> petList, Bag bag, Consumer<Boolean> callback) throws IOException {
         // 加载FXML
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/battle.fxml"));  // 假设你的战斗界面FXML路径
