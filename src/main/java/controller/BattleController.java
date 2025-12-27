@@ -14,7 +14,7 @@ import entity.Bag;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.function.Consumer;
-
+import service.GameDataManager;
 import battle.BattleManager;
 import battle.BattleResult;
 import battle.BattleStepResult;
@@ -162,7 +162,7 @@ public class BattleController {
         // 显示结果
         if (battleManager.getBattleResult() == BattleResult.PLAYER_WIN) {
             battleResultLabel.setText("你赢了！获得了30金币！");
-            
+            GameDataManager.getInstance().addCoins(30);
             // 尝试捕获敌人
             boolean caught = battleManager.tryCatchEnemy();
             if (caught) {
