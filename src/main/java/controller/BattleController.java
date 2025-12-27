@@ -19,7 +19,7 @@ import battle.BattleManager;
 import battle.BattleResult;
 import battle.BattleStepResult;
 import java.io.IOException;
-
+import javafx.scene.control.TextArea;
 
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class BattleController {
     @FXML private Label enemyPokemonName;
     @FXML private Label enemyPokemonStats;
     @FXML private VBox movesContainer;
-    @FXML private Label battleLog;
+    @FXML private TextArea battleLog;
     @FXML private Label battleResultLabel;
     
     private BattleManager battleManager;
@@ -45,7 +45,7 @@ public class BattleController {
         
         updateBattleUI();
         createMoveButtons();
-        battleLog.setText("战斗开始！");
+        battleLog.appendText("战斗开始！");
     }
     public BattleController(List<Pet> petList, Bag bag, Consumer<Boolean> callback) throws IOException {
         // 加载FXML
@@ -69,7 +69,7 @@ public class BattleController {
         this.battleManager = manager;
         updateBattleUI();
         createMoveButtons();
-        battleLog.setText("战斗开始！");
+        battleLog.appendText("战斗开始！");
     }
     
     public Parent getRoot() {
@@ -133,7 +133,7 @@ public class BattleController {
         if (!battleManager.isPlayerTurn()) return;
         
         BattleStepResult result = battleManager.playerUseMove(moveIndex);
-        battleLog.setText(result.getMessage());
+        battleLog.appendText(result.getMessage());
         
         if (result.isSuccess()) {
             // 检查战斗是否结束
@@ -144,7 +144,7 @@ public class BattleController {
             
             // 敌人回合
             BattleStepResult enemyResult = battleManager.enemyUseMove();
-            battleLog.setText(battleLog.getText() + "\n" + enemyResult.getMessage());
+            battleLog.appendText(battleLog.getText() + "\n" + enemyResult.getMessage());
             
             if (battleManager.isBattleEnded()) {
                 endBattle();
@@ -180,7 +180,7 @@ public class BattleController {
         
         updateBattleUI();
         createMoveButtons();
-        battleLog.setText("战斗开始！");
+        battleLog.appendText("战斗开始！");
     }
     @FXML
     private void onExit(ActionEvent event) {
