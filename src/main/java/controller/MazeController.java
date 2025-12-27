@@ -97,7 +97,7 @@ public class MazeController {
             // 检查是否到达终点
             if (maze.isEnd(newX, newY)) {
             	
-                goBackToMain();
+            	goBackToBedroom();
                 return;
             }
             
@@ -192,7 +192,25 @@ public class MazeController {
             }
         }
     }
+	private void goBackToBedroom() {
+	    if (primaryStage != null) {
+	        try {
+	            // 1. 加载卧室选择界面
+	            FXMLLoader loader = new FXMLLoader(getClass().getResource("/bedroom-select.fxml"));
+	            Parent root = loader.load();
+	            
+	            // 2. 获取控制器并注入 MainController（如果你的架构需要的话）
+	            // BedroomSelectController controller = loader.getController();
+	            // controller.setMainController(...); 
 
+	            primaryStage.setScene(new Scene(root, 800, 600));
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	            // 如果加载失败，回退到主菜单防止程序卡死
+	            goBackToMain();
+	        }
+	    }
+	}
     public void setPrimaryStage(Stage stage) {
         this.primaryStage = stage;
     }

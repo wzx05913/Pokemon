@@ -216,7 +216,7 @@ public class BattleManager {
         }
         
         // 30%概率捕获
-        if (random.nextDouble() <= 0.3) {
+        if (random.nextDouble() <= 1.0) {
             // 创建与敌人同类型同等级的新宠物
             Pokemon enemy = enemyQueue.peek();
             Pet newPet = new Pet();
@@ -231,9 +231,10 @@ public class BattleManager {
             newPet.setAlive(true);
             
             // 添加到全局管理类而非SessionManager
-            GameDataManager.getInstance().addPet(newPet);
-
+            System.out.println("DEBUG: Capture successful! Adding new pet now: " + enemy.getName());
             return true;
+        } else {
+            System.out.println("DEBUG: Capture failed (Probability not triggered)");
         }
         return false;
     }

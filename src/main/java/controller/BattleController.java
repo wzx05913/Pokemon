@@ -171,6 +171,11 @@ public class BattleController {
         } else {
             battleResultLabel.setText("你输了！");
         }
+        
+        boolean caught = battleManager.tryCatchEnemy();
+        if (caught) {
+            battleResultLabel.setText(battleResultLabel.getText() + "\n成功捕获了敌人的宝可梦！");
+        }
     }
  // 增加一个方法用于接收 MazeController 传来的数据
     public void setupBattle(List<Pet> petList, Consumer<Boolean> callback) {
@@ -184,7 +189,20 @@ public class BattleController {
     }
     @FXML
     private void onExit(ActionEvent event) {
-        // 关闭战斗窗口的逻辑
+    	// 1. 如果战斗还没结束，算作中途退出，设为战败
+        if (!battleManager.isBattleEnded()) {
+            battleManager.exitBattle(); 
+            System.out.println("中途退出，判定为战败");
+        }
+        
+        // 2. 执行回调（通知父窗口战斗结果）
+        if (battleEndCallback != null) {
+            // 将当前的最终胜负状态传回（可能是赢了，也可能是中途退出的输）
+            boolean isWin = (battleManager.getBattleResult() == BattleResult.PLAYER_WIN);
+            battleEndCallback.accept(isWin);
+        }
+        
+        // 3. 关闭当前窗口
         movesContainer.getScene().getWindow().hide();
     }
 }
