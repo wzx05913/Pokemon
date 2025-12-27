@@ -1,85 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="600" prefWidth="800" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BattleController">
-    
-    <!-- 顶部：玩家信息 -->
-    <top>
-        <VBox alignment="TOP_RIGHT" style="-fx-background-color: #e6f7ff; -fx-padding: 10;">
-            <Label fx:id="playerPokemonName">
-                <font>
-                    <Font name="Arial" size="20" />
-                </font>
-            </Label>
-            <Label fx:id="playerPokemonStats">
-                <font>
-                    <Font name="Arial" size="14" />
-                </font>
-            </Label>
-        </VBox>
-    </top>
-    
-    <!-- 底部：敌人信息 -->
-    <bottom>
-        <VBox style="-fx-background-color: #ffe6e6; -fx-padding: 10;">
+<BorderPane prefHeight="600.0" prefWidth="800.0"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controller.BattleController">
+
+    <!-- 左侧：敌人图片 + 信息 -->
+    <left>
+        <VBox spacing="8" style="-fx-padding:10;">
+            <ImageView fx:id="enemyImageView" fitWidth="200" fitHeight="200" preserveRatio="true"/>
             <Label fx:id="enemyPokemonName">
-                <font>
-                    <Font name="Arial" size="20" />
-                </font>
+                <font><Font size="16"/></font>
             </Label>
             <Label fx:id="enemyPokemonStats">
-                <font>
-                    <Font name="Arial" size="14" />
-                </font>
+                <font><Font size="12"/></font>
             </Label>
         </VBox>
-    </bottom>
-    
+    </left>
+
     <!-- 中间：战斗日志 -->
     <center>
-        <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="458.0" style="-fx-padding: 10;">
-            <Label text="战况">
-                <font>
-                    <Font name="Arial" size="16" />
-                </font>
-            </Label>
-            <TextArea fx:id="battleLog" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="402.0" prefWidth="444.0" />
-            <Label fx:id="battleResultLabel" style="-fx-text-fill: #ff0000;">
-                <font>
-                    <Font name="Arial" size="16" />
-                </font>
-            </Label>
+        <VBox spacing="8" style="-fx-padding:10;">
+            <Label text="战况"><font><Font size="16"/></font></Label>
+            <TextArea fx:id="battleLog" editable="false" prefHeight="420" wrapText="true"/>
+            <Label fx:id="battleResultLabel" style="-fx-text-fill: red;"><font><Font size="14"/></font></Label>
         </VBox>
     </center>
-    
-    <!-- 右侧：技能按钮 -->
+
+    <!-- 右侧：玩家图片 + 信息 + 技能按钮（鼠标和技能都在右侧）-->
     <right>
-      <VBox prefHeight="480.0" prefWidth="174.0">
-         <children>
-            <ImageView fitHeight="292.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-               <Label minHeight="-Infinity" minWidth="-Infinity" text="选择技能">
-                   <font>
-                       <Font name="Arial" size="16" />
-                   </font>
-               </Label>
-         </children>
-      </VBox>
+        <VBox spacing="8" style="-fx-padding:10;">
+            <ImageView fx:id="playerImageView" fitWidth="200" fitHeight="200" preserveRatio="true"/>
+            <Label fx:id="playerPokemonName">
+                <font><Font size="16"/></font>
+            </Label>
+            <Label fx:id="playerPokemonStats">
+                <font><Font size="12"/></font>
+            </Label>
+
+            <Label text="选择技能："><font><Font size="14"/></font></Label>
+
+            <!-- 用 ScrollPane 包装 VBox，保证技能垂直排列且可滚动 -->
+            <ScrollPane fitToWidth="true" prefViewportHeight="220">
+                <content>
+                    <VBox fx:id="movesContainer" spacing="8" style="-fx-padding:4;"/>
+                </content>
+            </ScrollPane>
+        </VBox>
     </right>
-    
-    <!-- 左侧：退出按钮 -->
-    <left>
-      <VBox prefHeight="480.0" prefWidth="178.0">
-         <children>
-               <Button onAction="#onExit" prefWidth="100" text="退出战斗" />
-            <ImageView fitHeight="287.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-         </children>
-      </VBox>
-    </left>
+
+    <!-- 顶部退出 -->
+    <top>
+        <HBox style="-fx-padding:8;">
+            <Button text="退出战斗" onAction="#onExit"/>
+        </HBox>
+    </top>
 </BorderPane>

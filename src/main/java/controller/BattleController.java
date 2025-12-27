@@ -2,7 +2,6 @@ package controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -18,19 +17,22 @@ import service.GameDataManager;
 import battle.BattleManager;
 import battle.BattleResult;
 import battle.BattleStepResult;
-import java.io.IOException;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import java.io.InputStream;
+import javafx.scene.layout.Priority;
 
-
-import java.util.ArrayList;
 public class BattleController {
     @FXML private Label playerPokemonName;
     @FXML private Label playerPokemonStats;
     @FXML private Label enemyPokemonName;
     @FXML private Label enemyPokemonStats;
-    @FXML private VBox movesContainer;
+    @FXML private VBox movesContainer;       // 改为 VBox，垂直排列
     @FXML private TextArea battleLog;
     @FXML private Label battleResultLabel;
+    @FXML private ImageView playerImageView;
+    @FXML private ImageView enemyImageView;
 
     private BattleManager battleManager;
     private List<Button> moveButtons = new ArrayList<>();
@@ -38,6 +40,7 @@ public class BattleController {
     private Consumer<Boolean> battleEndCallback;
 
     public BattleController() {}
+
     public void initData(List<Pet> petList, Bag bag, Consumer<Boolean> callback) {
         this.battleEndCallback = callback;
         this.battleManager = new BattleManager();
@@ -45,39 +48,18 @@ public class BattleController {
 
         updateBattleUI();
         createMoveButtons();
-        battleLog.appendText("战斗开始！");
-    }
-    public BattleController(List<Pet> petList, Bag bag, Consumer<Boolean> callback) throws IOException {
-        // 加载FXML
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/battle.fxml"));  // 假设你的战斗界面FXML路径
-        loader.setController(this);
-        this.root = loader.load();
-        this.battleEndCallback = callback;
-
-        // 初始化战斗管理器
-        // 初始化战斗管理器时使用排序后的宠物队列副本
-        List<Pet> sortedPetList = new ArrayList<>(petList);
-        sortedPetList.sort((p1, p2) -> Integer.compare(p2.getLevel(), p1.getLevel())); // 从大到小排序
-        this.battleManager = new BattleManager();
-        this.battleManager.initBattle(petList);
-
-        // 初始化UI
-        initialize(battleManager);
+        appendLog("战斗开始！");
     }
 
     public void initialize(BattleManager manager) {
         this.battleManager = manager;
         updateBattleUI();
         createMoveButtons();
-        battleLog.appendText("战斗开始！");
+        appendLog("战斗开始！");
     }
 
-    public Parent getRoot() {
-        return root;
-    }
-
+    // 纵向创建技能按钮
     private void createMoveButtons() {
-        // 清理旧按钮（防止切换宠物时重复）
         moveButtons.clear();
         movesContainer.getChildren().clear();
 
@@ -87,17 +69,18 @@ public class BattleController {
         List<Move> moves = current.getMoves();
         for (int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
-            int index = i;
+            final int index = i;
 
             Button button = new Button();
-            button.setText(move.getName() + " (" + move.getPower() + "伤害, 消耗" + move.getPpCost() + "PP)");
+            button.setText(move.getName() + " (" + move.getPower() + ")");
+            button.setMaxWidth(Double.MAX_VALUE); // 填满容器宽度，纵向更美观
             button.setOnAction(e -> onUseMove(index));
 
             moveButtons.add(button);
             movesContainer.getChildren().add(button);
+            VBox.setVgrow(button, Priority.NEVER);
         }
 
-        // 更新按钮状态（可用/不可用）
         updateMoveButtons();
     }
 
@@ -107,43 +90,43 @@ public class BattleController {
 
         if (playerPokemon != null) {
             playerPokemonName.setText(playerPokemon.getName() + " Lv." + playerPokemon.getLevel());
-            playerPokemonStats.setText(String.format("HP: %d/%d PP: %d/%d",
+            playerPokemonStats.setText(String.format("HP: %d/%d   PP: %d/%d",
                     playerPokemon.getHp(), playerPokemon.getMaxHp(),
                     playerPokemon.getPp(), playerPokemon.getMaxPp()));
+            loadImageToView(playerPokemon.getName(), playerImageView);
         } else {
             playerPokemonName.setText("无可用宠物");
             playerPokemonStats.setText("");
+            playerImageView.setImage(null);
         }
 
         if (enemyPokemon != null) {
-            enemyPokemonName.setText("敌人的" + enemyPokemon.getName() + " Lv." + enemyPokemon.getLevel());
+            enemyPokemonName.setText("敌人的 " + enemyPokemon.getName() + " Lv." + enemyPokemon.getLevel());
             enemyPokemonStats.setText(String.format("HP: %d/%d",
                     enemyPokemon.getHp(), enemyPokemon.getMaxHp()));
+            loadImageToView(enemyPokemon.getName(), enemyImageView);
         } else {
-            // 当 currentEnemyPokemon 为 null 时，尝试显示最近被击败的敌人（HP:0）
             Pokemon last = battleManager.getLastDefeatedEnemy();
             if (last != null) {
-                enemyPokemonName.setText("敌人的" + last.getName() + " Lv." + last.getLevel() + "（已被击败）");
+                enemyPokemonName.setText("敌人的 " + last.getName() + "（已被击败）");
                 enemyPokemonStats.setText(String.format("HP: %d/%d", 0, last.getMaxHp()));
+                loadImageToView(last.getName(), enemyImageView);
             } else {
                 enemyPokemonName.setText("无敌人");
                 enemyPokemonStats.setText("");
+                enemyImageView.setImage(null);
             }
         }
 
-        // 如果当前玩家宠物发生变化（比如战死后换宠），保证按钮与当前宠物技能同步
         Pokemon current = battleManager.getCurrentPlayerPokemon();
         if (current == null) {
-            // 清空按钮
             moveButtons.clear();
             movesContainer.getChildren().clear();
         } else {
             List<Move> moves = current.getMoves();
             if (moveButtons.size() != moves.size()) {
-                // 技能数量变化：重建按钮
                 createMoveButtons();
             } else {
-                // 刷新按钮文本和状态
                 updateMoveButtons();
             }
         }
@@ -154,19 +137,22 @@ public class BattleController {
         if (current == null) return;
 
         List<Move> moves = current.getMoves();
-        // 若数量不一致，重建更稳妥（防止 index mismatch）
-        if (moveButtons.size() != moves.size()) {
-            createMoveButtons();
-            return;
-        }
-
         for (int i = 0; i < moveButtons.size() && i < moves.size(); i++) {
             Move move = moves.get(i);
             Button button = moveButtons.get(i);
-            // 同步按钮文本（以防止仍显示旧技能名称）
-            button.setText(move.getName() + " (" + move.getPower() + "伤害, 消耗" + move.getPpCost() + "PP)");
+            button.setText(move.getName() + " (" + move.getPower() + ")");
             boolean canUse = current.getPp() >= move.getPpCost();
             button.setDisable(!canUse || !battleManager.isPlayerTurn());
+        }
+    }
+
+    // 把日志追加和换行独立成方法，统一格式
+    private void appendLog(String text) {
+        if (text == null || text.isEmpty()) return;
+        if (battleLog.getText().isEmpty()) {
+            battleLog.appendText(text);
+        } else {
+            battleLog.appendText("\n" + text);
         }
     }
 
@@ -175,55 +161,84 @@ public class BattleController {
         if (!battleManager.isPlayerTurn()) return;
 
         BattleStepResult result = battleManager.playerUseMove(moveIndex);
-        battleLog.appendText(result.getMessage());
+        appendLog(result.getMessage());
+
+        // 立刻刷新 UI，确保 HP / 图片 / 被击败状态能在日志前端看到
+        updateBattleUI();
 
         if (result.isSuccess()) {
-            // 检查战斗是否结束
+            // 如果玩家回合就结束了整个战斗（例如最后一击），在刷新 UI 后再处理结束逻辑
             if (battleManager.isBattleEnded()) {
                 endBattle();
-                // 更新 UI（确保显示被击败的敌人 HP）
-                updateBattleUI();
                 return;
             }
 
             // 敌人回合
             BattleStepResult enemyResult = battleManager.enemyUseMove();
-            // 只追加敌人回合的信息（避免重复把已有文本再写一次）
-            battleLog.appendText("\n" + enemyResult.getMessage());
+            appendLog(enemyResult.getMessage());
+
+            // 刷新界面显示敌人动作带来的变化
+            updateBattleUI();
 
             if (battleManager.isBattleEnded()) {
                 endBattle();
-                updateBattleUI();
                 return;
             }
         }
 
+        // 最后再次刷新（正常回合结束）
         updateBattleUI();
     }
 
     private void endBattle() {
-        // 禁用所有按钮
         moveButtons.forEach(btn -> btn.setDisable(true));
 
-        // 显示结果
         if (battleManager.getBattleResult() == BattleResult.PLAYER_WIN) {
             battleResultLabel.setText("你赢了！获得了30金币！");
             GameDataManager.getInstance().addCoins(30);
-            // 尝试捕获敌人
             boolean caught = battleManager.tryCatchEnemy();
             if (caught) {
+                appendLog("成功捕获了敌人的宝可梦！");
                 battleResultLabel.setText(battleResultLabel.getText() + "\n成功捕获了敌人的宝可梦！");
             }
         } else {
             battleResultLabel.setText("你输了！");
         }
+    }
 
-        boolean caught = battleManager.tryCatchEnemy();
-        if (caught) {
-            battleResultLabel.setText(battleResultLabel.getText() + "\n成功捕获了敌人的宝可梦！");
+    // 加载图片到 ImageView，约定资源路径 /images/<name>.png
+    private void loadImageToView(String name, ImageView view) {
+        if (name == null || view == null) return;
+        String path = "/images/" + name + ".png";
+        try (InputStream is = getClass().getResourceAsStream(path)) {
+            if (is != null) {
+                Image img = new Image(is);
+                view.setImage(img);
+            } else {
+                view.setImage(null);
+                System.err.println("DEBUG: 找不到图片: " + path);
+            }
+        } catch (Exception ex) {
+            view.setImage(null);
+            System.err.println("加载图片失败: " + ex.getMessage());
         }
     }
-    // 增加一个方法用于接收 MazeController 传来的数据
+
+    @FXML
+    private void onExit(ActionEvent event) {
+        if (!battleManager.isBattleEnded()) {
+            battleManager.exitBattle();
+        }
+        if (battleEndCallback != null) {
+            boolean isWin = (battleManager.getBattleResult() == BattleResult.PLAYER_WIN);
+            battleEndCallback.accept(isWin);
+        }
+        if (movesContainer != null && movesContainer.getScene() != null) {
+            movesContainer.getScene().getWindow().hide();
+        }
+    }
+
+    // 对外可用的初始化接口（另一种入口）
     public void setupBattle(List<Pet> petList, Consumer<Boolean> callback) {
         this.battleEndCallback = callback;
         this.battleManager = new BattleManager();
@@ -231,24 +246,6 @@ public class BattleController {
 
         updateBattleUI();
         createMoveButtons();
-        battleLog.appendText("战斗开始！");
-    }
-    @FXML
-    private void onExit(ActionEvent event) {
-        // 1. 如果战斗还没结束，算作中途退出，设为战败
-        if (!battleManager.isBattleEnded()) {
-            battleManager.exitBattle();
-            System.out.println("中途退出，判定为战败");
-        }
-
-        // 2. 执行回调（通知父窗口战斗结果）
-        if (battleEndCallback != null) {
-            // 将当前的最终胜负状态传回（可能是赢了，也可能是中途退出的输）
-            boolean isWin = (battleManager.getBattleResult() == BattleResult.PLAYER_WIN);
-            battleEndCallback.accept(isWin);
-        }
-
-        // 3. 关闭当前窗口
-        movesContainer.getScene().getWindow().hide();
+        appendLog("战斗开始！");
     }
 }
