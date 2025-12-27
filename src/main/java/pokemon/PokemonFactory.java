@@ -39,7 +39,13 @@ public class PokemonFactory {
     public static Pet convertToEntity(Pokemon pokemon, int userId) {
         Pet pet = new Pet();
         pet.setUserId(userId);
-        pet.setType(pokemon.getName());
+
+        String name = pokemon.getName();
+        if (name == null || name.trim().isEmpty() || !name.matches(".*[\\u4e00-\\u9fa5].*")) {
+            throw new IllegalStateException("convertToEntity: Pokemon 名称非法，不能保存到 DB: [" + name + "]");
+        }
+        pet.setType(name.trim());
+
         pet.setLevel(pokemon.getLevel());
         pet.setAttack(pokemon.getAttack());
         pet.setExperience(pokemon.getExp());

@@ -87,13 +87,17 @@ public class BattleController {
     private void updateBattleUI() {
         Pokemon playerPokemon = battleManager.getCurrentPlayerPokemon();
         Pokemon enemyPokemon = battleManager.getCurrentEnemyPokemon();
-
+        Pokemon lastDefPlayer = battleManager.getLastDefeatedPlayer(); // 需在 BattleManager 添加 getter
         if (playerPokemon != null) {
             playerPokemonName.setText(playerPokemon.getName() + " Lv." + playerPokemon.getLevel());
             playerPokemonStats.setText(String.format("HP: %d/%d   PP: %d/%d",
                     playerPokemon.getHp(), playerPokemon.getMaxHp(),
                     playerPokemon.getPp(), playerPokemon.getMaxPp()));
             loadImageToView(playerPokemon.getName(), playerImageView);
+        } else if (lastDefPlayer != null) {
+            playerPokemonName.setText(lastDefPlayer.getName() + " Lv." + lastDefPlayer.getLevel() + "（已被击败）");
+            playerPokemonStats.setText(String.format("HP: %d/%d", 0, lastDefPlayer.getMaxHp()));
+            loadImageToView(lastDefPlayer.getName(), playerImageView);
         } else {
             playerPokemonName.setText("无可用宠物");
             playerPokemonStats.setText("");
@@ -167,15 +171,30 @@ public class BattleController {
         updateBattleUI();
 
         if (result.isSuccess()) {
-            // 如果玩家回合就结束了整个战斗（例如最后一击），在刷新 UI 后再处理结束逻辑
+            // 如果战斗结束（玩家胜利或失败），直接处理结束逻辑
             if (battleManager.isBattleEnded()) {
                 endBattle();
                 return;
             }
 
-            // 敌人回合
+            // 如果刚击败了敌人，跳过敌人本回合的反击：
+            if (battleManager.wasEnemyJustDefeated()) {
+                // 不调用 enemyUseMove()，而是推进到下一只敌人并清除标志
+                battleManager.advanceAfterDefeat();
+                // 刷新 UI，显示下一个敌人或继续
+                updateBattleUI();
+                // 如果推进后战斗结束（没有更多敌人），处理结束
+                if (battleManager.isBattleEnded()) {
+                    endBattle();
+                }
+                return;
+            }
+
+            // 正常情形：敌人回合
             BattleStepResult enemyResult = battleManager.enemyUseMove();
-            appendLog(enemyResult.getMessage());
+            if (enemyResult != null && enemyResult.getMessage() != null) {
+                appendLog(enemyResult.getMessage());
+            }
 
             // 刷新界面显示敌人动作带来的变化
             updateBattleUI();

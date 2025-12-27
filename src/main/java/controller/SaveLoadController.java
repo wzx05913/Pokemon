@@ -467,13 +467,22 @@ public class SaveLoadController {
                 Pet pet = new Pet();
                 pet.setUserId(playerId);
 
-                // 关键修改：使用pokemon.getName()作为数据库的Type
+                // 严格校验：只允许保存带有中文名称的 pokemon.getName()
                 String pokemonName = pokemon.getName();
                 if (pokemonName == null || pokemonName.trim().isEmpty()) {
-                    // 如果没有名称，尝试从Pokemon类获取
-                    pokemonName = pokemon.getClass().getSimpleName();
+                    // 中止保存并通知（不悄悄回退成英文）
+                    showAlert("错误", "宠物名称为空，保存中止。请检查代码中何处将宠物名称清空或设置为非法值。", AlertType.ERROR);
+                    return;
                 }
-                pet.setType(pokemonName);  // 数据库Type = Pokemon的name
+                pokemonName = pokemonName.trim();
+                // 简单校验包含汉字，确保不是英文或其它乱码
+                if (!pokemonName.matches(".*[\\u4e00-\\u9fa5].*")) {
+                    showAlert("错误", "检测到将要保存的宠物名称不是中文: " + pokemonName + "，保存已中止。请排查来源。", AlertType.ERROR);
+                    return;
+                }
+
+                // 仅在通过校验后写入数据库
+                pet.setType(pokemonName);  // 数据库 Type = 中文名称
 
                 pet.setLevel(pokemon.getLevel());
                 pet.setAttack(pokemon.getAttack());
