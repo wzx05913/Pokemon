@@ -38,6 +38,10 @@ public class PetManageController {
     @FXML
     private Label expLabel;
     @FXML
+    private Label attackLabel;
+    @FXML
+    private Label defLabel;
+    @FXML
     private Button useEggButton;
     @FXML
     private Button useSoapButton;
@@ -80,6 +84,8 @@ public class PetManageController {
         idLabel.setText("--");
         cleanLabel.setText("--");
         levelLabel.setText("--");
+        attackLabel.setText("--");
+        defLabel.setText("--");
 
         if (expLabel != null) {
             expLabel.setText("--/--");
@@ -94,9 +100,6 @@ public class PetManageController {
         }
     }
 
-    /**
-     * 加载宠物列表到左侧滚动面板
-     */
     private void loadPetList() {
         try {
             // 获取宠物列表
@@ -187,9 +190,6 @@ public class PetManageController {
         }
     }
 
-    /**
-     * 选择宠物，显示详细信息
-     */
     private void selectPet(Pet pet) {
         selectedPet = pet;
         selectedPokemon = null;
@@ -214,6 +214,8 @@ public class PetManageController {
         cleanLabel.setText(clean + "/100");
 
         levelLabel.setText(String.valueOf(pet.getLevel()));
+        attackLabel.setText(String.valueOf(pet.getAttack()));
+        defLabel.setText(String.valueOf(selectedPokemon.getDefense()));
 
         if (expLabel != null) {
             int exp = pet.getExperience() != null ? pet.getExperience() : 0;
@@ -351,8 +353,6 @@ public class PetManageController {
 
         playerBag.setEggCount(playerBag.getEggCount() - 1);
 
-        // 刷新界面
-        loadPetList();
         updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);
@@ -361,9 +361,6 @@ public class PetManageController {
         showAlert("成功", "使用蛋成功，宠物已复活");
     }
 
-    /**
-     * 使用肥皂：增加30清洁度，最大100
-     */
     private void useSoap() {
         if (selectedPet == null) {
             showAlert("提示", "请先选择一个宠物");
@@ -390,9 +387,6 @@ public class PetManageController {
         // 减少背包中的肥皂数量
         playerBag.setSoapCount(playerBag.getSoapCount() - 1);
 
-
-        // 刷新界面
-        loadPetList();
         updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);
@@ -427,8 +421,6 @@ public class PetManageController {
 
         playerBag.setRiceCount(playerBag.getRiceCount() - 1);
 
-        // 刷新界面
-        loadPetList();
         updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);

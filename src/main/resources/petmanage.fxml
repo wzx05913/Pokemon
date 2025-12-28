@@ -10,10 +10,8 @@
 <?import javafx.scene.text.Font?>
 
 <!-- 添加控制器声明 -->
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-      prefHeight="444.0" prefWidth="685.0" style="-fx-background-color: transparent;"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controller.PetManageController">
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="444.0" prefWidth="685.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.PetManageController">
 
     <children>
         <ImageView fitHeight="454.0" fitWidth="673.0" layoutX="5.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
@@ -86,9 +84,29 @@
                 <!-- 添加 fx:id -->
                 <Label fx:id="expLabel" layoutX="50.0" layoutY="101.0" prefHeight="26.0" prefWidth="106.0" text="（当前经验/升级经验）" textAlignment="CENTER">
                     <font>
-                        <Font name="Bell MT" size="12.0" />
+                        <Font name="Arial" size="12.0" />
                     </font>
                 </Label>
+            <Label layoutY="127.0" prefHeight="25.0" prefWidth="86.0" text="攻击：" textAlignment="CENTER">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="attackLabel" layoutX="50.0" layoutY="127.0" prefHeight="26.0" prefWidth="106.0" text="（当前攻击）" textAlignment="CENTER">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font>
+            </Label>
+            <Label layoutY="153.0" prefHeight="25.0" prefWidth="86.0" text="防御：" textAlignment="CENTER">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="defLabel" layoutX="50.0" layoutY="153.0" prefHeight="26.0" prefWidth="106.0" text="（当前防御）" textAlignment="CENTER">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font>
+            </Label>
             </children>
         </AnchorPane>
 

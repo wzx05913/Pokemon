@@ -335,4 +335,5 @@ public abstract class Pokemon {
     public void setAttack(int attack) {
         this.attack = attack;
     }
+
 }

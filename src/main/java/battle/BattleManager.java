@@ -407,7 +407,7 @@ public class BattleManager {
         int userId = GameDataManager.getInstance().getCurrentUserId();
         boolean isGuest = (userId == -1);
 
-        if (random.nextDouble() <= 1) {
+        if (random.nextDouble() <= 0.2) {
             try {
                 // 创建宠物实体（但不保存到数据库）
                 entity.Pet newPet = service.PetFactory.createPetEntity(userId, enemy);
