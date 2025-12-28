@@ -48,12 +48,38 @@ public class BedroomSelectController {
         // 可以在这里添加一些初始化代码
     }
 
-    // 宠物按钮点击事件
     @FXML
     private void onPetButtonClick() {
         System.out.println("宠物按钮被点击");
-        // TODO: 跳转到宠物管理界面
-        showAlert("功能开发中", "宠物管理功能正在开发中...");
+        try {
+            java.net.URL resource = getClass().getResource("/petmanage.fxml");
+            if (resource == null) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("错误");
+                a.setHeaderText(null);
+                a.setContentText("找不到宠物管理页面资源(petmanage.fxml)。");
+                a.showAndWait();
+                return;
+            }
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(resource);
+            javafx.scene.Parent root = loader.load();
+
+            javafx.stage.Stage dialog = new javafx.stage.Stage();
+            dialog.initOwner(petButton.getScene().getWindow());
+            dialog.initModality(javafx.stage.Modality.WINDOW_MODAL); // 如需非模态，注释掉这行
+            dialog.setTitle("宠物管理");
+            dialog.setScene(new javafx.scene.Scene(root, 685, 444)); // 用你的 FXML尺寸
+            dialog.setResizable(false);
+            dialog.centerOnScreen();
+            dialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("错误");
+            a.setHeaderText(null);
+            a.setContentText("无法打开宠物管理界面：" + e.getMessage());
+            a.showAndWait();
+        }
     }
 
     // 休息（存档）按钮点击事件
@@ -119,7 +145,25 @@ public class BedroomSelectController {
     private void onOutButtonClick(ActionEvent event) {
         System.out.println("外出按钮被点击");
         try {
-        	// 从事件对象中获取目标组件
+            // 每次外出减少所有宠物的清洁度（在内存中修改全局变量）
+            service.GameDataManager.getInstance().decreaseAllPetsClean(20);
+
+            // 检查是否还有可出战的宠物（排除 isAlive=false）
+            service.GameDataManager gdm = service.GameDataManager.getInstance();
+            Player current = gdm.getCurrentPlayer();
+            boolean hasAlive = false;
+            if (current != null) {
+                for (pokemon.Pokemon p : current.getPets()) {
+                    if (p != null && p.isAlive()) { hasAlive = true; break; }
+                }
+            }
+            if (!hasAlive) {
+                // 若全部死亡，弹窗提示并阻止进入迷宫
+                showAlert("无法外出", "您已没有可以出战的宠物，无法外出探索！");
+                return;
+            }
+
+            // 从事件对象中获取目标组件
             Stage currentStage = (Stage) ((javafx.scene.Node) event.getTarget()).getScene().getWindow();
         	// 加载迷宫界面
         	FXMLLoader loader = new FXMLLoader(getClass().getResource("/maze.fxml"));
@@ -143,11 +187,17 @@ public class BedroomSelectController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/shop.fxml"));
             Parent shopRoot = loader.load();
 
-            // 在新窗口中打开商店
+            // 在新窗口中打开商店（使用较大尺寸以容纳内容）
             Stage shopStage = new Stage();
             shopStage.setTitle("宝可梦商店");
-            shopStage.setScene(new Scene(shopRoot, 600, 400));
-            shopStage.show();
+            // 使用模态窗口并设置拥有者，避免被其他窗口遮挡
+            shopStage.initModality(Modality.WINDOW_MODAL);
+            shopStage.initOwner(shopButton.getScene().getWindow());
+            Scene scene = new Scene(shopRoot, 800, 600); // 加大为 800x600
+            shopStage.setScene(scene);
+            shopStage.setResizable(false);
+            shopStage.centerOnScreen();
+            shopStage.showAndWait();
 
         } catch (Exception e) {
             e.printStackTrace();

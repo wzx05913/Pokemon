@@ -31,6 +31,11 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.HashMap;
 
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
+
 
 public class MainController {
 
@@ -40,7 +45,7 @@ public class MainController {
     private Map<String, Parent> pages = new HashMap<>();
     private boolean initialized = false;
     private GameDataManager dataManager = GameDataManager.getInstance();
-    
+
     @FXML
     private void initialize() {
         if (!initialized) {
@@ -91,65 +96,121 @@ public class MainController {
         return null;
     }
 
-    // 继续游戏按钮
     @FXML
     private void handleContinueGame() {
         System.out.println("继续游戏按钮被点击");
-        // 这里可以添加加载已有用户的功能
+        // 弹出存档管理窗口，但处于只读模式（只能读取，不能保存或删除）
+        try {
+            // 先检查资源是否存在，避免 "Location is not set"
+            java.net.URL resource = getClass().getResource("/savewidget.fxml");
+            if (resource == null) {
+                System.err.println("无法找到 /savewidget.fxml");
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("错误");
+                a.setHeaderText(null);
+                a.setContentText("找不到存档界面资源(savewidget.fxml)。");
+                a.showAndWait();
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(resource);
+            Parent saveLoadRoot = loader.load();
+            controller.SaveLoadController saveLoadController = loader.getController();
+
+            // 设置只读模式并传入主控制器引用（以便读档后跳转页面）
+            saveLoadController.setReadOnly(true);
+            saveLoadController.setMainController(this);
+
+            // 将当前会话中的玩家传入（可能为 null）
+            saveLoadController.setCurrentPlayer(GameDataManager.getInstance().getCurrentPlayer());
+
+            Stage saveLoadStage = new Stage();
+            saveLoadStage.initModality(Modality.WINDOW_MODAL);
+            if (container != null && container.getScene() != null) {
+                saveLoadStage.initOwner(container.getScene().getWindow());
+            }
+            saveLoadStage.initStyle(StageStyle.UTILITY);
+            saveLoadStage.setTitle("存档管理（只读）");
+
+            Scene scene = new Scene(saveLoadRoot);
+            saveLoadStage.setScene(scene);
+
+            // 使用 JavaFX 提供的居中方法，避免依赖未初始化的宽高
+            saveLoadStage.centerOnScreen();
+
+            saveLoadStage.setResizable(false);
+            saveLoadStage.showAndWait();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("无法打开存档界面：" + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("错误");
+            alert.setHeaderText(null);
+            alert.setContentText("无法打开存档界面：" + e.getMessage());
+            alert.showAndWait();
+        }
     }
+
+    // 继续下面的类内容（不变）...
 
     // 创建新用户
 
     //private void createNewUser() throws SQLException {
-        //UserDAO userDAO = new UserDAO();
-        //User newUser = userDAO.createUser();
-        //sessionManager.setCurrentUser(newUser);
-        //System.out.println("新用户创建成功，用户ID: " + newUser.getUserId());
+    //UserDAO userDAO = new UserDAO();
+    //User newUser = userDAO.createUser();
+    //sessionManager.setCurrentUser(newUser);
+    //System.out.println("新用户创建成功，用户ID: " + newUser.getUserId());
     //}
 
     // 加载页面
     private void loadPage(String name, String fxmlPath) {
         try {
             System.out.println("正在加载页面: " + fxmlPath);
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent page = loader.load();
+            java.net.URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                System.err.println("无法找到资源: " + fxmlPath);
+            } else {
+                FXMLLoader loader = new FXMLLoader(resource);
+                Parent page = loader.load();
 
-            // 获取控制器
-            Object controller = loader.getController();
+                // 获取控制器
+                Object controller = loader.getController();
 
-            if ("select".equals(name)) {
-                SelectController selectController = (SelectController) controller;
-                selectController.setMainController(this);
-            } else if ("hint".equals(name)) {
-                // 为hint页面设置控制器
-                if (controller instanceof BedroomHintController) {
-                    BedroomHintController hintController = (BedroomHintController) controller;
-                    hintController.setMainController(this);
-                    System.out.println("BedroomHintController设置成功");
-                }
-            }else if ("main".equals(name)) {  // 注意：这里是"main"，对应bedroom-select
-                if (controller instanceof BedroomSelectController) {
-                    BedroomSelectController selectController = (BedroomSelectController) controller;
+                if ("select".equals(name)) {
+                    SelectController selectController = (SelectController) controller;
                     selectController.setMainController(this);
-                    System.out.println("BedroomSelectController设置成功");
-                } else {
-                    System.out.println("警告: bedroom-select页面的控制器类型不正确");
+                } else if ("hint".equals(name)) {
+                    // 为hint页面设置控制器
+                    if (controller instanceof BedroomHintController) {
+                        BedroomHintController hintController = (BedroomHintController) controller;
+                        hintController.setMainController(this);
+                        System.out.println("BedroomHintController设置成功");
+                    }
+                }else if ("main".equals(name)) {  // 注意：这里是"main"，对应bedroom-select
+                    if (controller instanceof BedroomSelectController) {
+                        BedroomSelectController selectController = (BedroomSelectController) controller;
+                        selectController.setMainController(this);
+                        System.out.println("BedroomSelectController设置成功");
+                    } else {
+                        System.out.println("警告: bedroom-select页面的控制器类型不正确");
+                    }
                 }
-            }
-            if ("dialog1".equals(name)) {
-                page.setOnMouseClicked(event -> {
-                    System.out.println("dialog1被点击");
-                    switchToPage("dialog2");
-                });
-            } else if ("dialog2".equals(name)) {
-                page.setOnMouseClicked(event -> {
-                    System.out.println("dialog2被点击");
-                    switchToPage("select");
-                });
-            }
+                if ("dialog1".equals(name)) {
+                    page.setOnMouseClicked(event -> {
+                        System.out.println("dialog1被点击");
+                        switchToPage("dialog2");
+                    });
+                } else if ("dialog2".equals(name)) {
+                    page.setOnMouseClicked(event -> {
+                        System.out.println("dialog2被点击");
+                        switchToPage("select");
+                    });
+                }
 
-            pages.put(name, page);
-            System.out.println("页面加载成功: " + fxmlPath);
+                pages.put(name, page);
+                System.out.println("页面加载成功: " + fxmlPath);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("页面加载失败: " + fxmlPath);
@@ -158,32 +219,31 @@ public class MainController {
 
     // 选择宠物
     public void selectPet(String petName) {
-    	try {
-            int userId = 1;
+        try {
+            int userId = -1;
             Pet pet = new Pet();
             pet.setName(petName);
+            pet.setType(petName);
             pet.setLevel(1);
             Pokemon pokemon = PokemonFactory.createPokemon(pet);
-            
+
             Pet petEntity = PokemonFactory.convertToEntity(pokemon, userId);
             GameDataManager.getInstance().addPet(petEntity);
-            
+
             Player player = new Player(100, userId);
             player.addPet(pokemon);
-            
+
             GameDataManager gameDataManager = GameDataManager.getInstance();
-            
-            // 使用GameDataManager替代SessionManager
+
             gameDataManager.setCurrentPlayer(player,false);
             gameDataManager.setCurrentPokemon(pokemon);
             gameDataManager.addPokemon(pokemon);
             gameDataManager.setCurrentUserId(userId);
-            
+
             BagDAO bagDAO = new BagDAO();
             Bag userBag = bagDAO.getBagByUserId(userId);
             if (userBag == null) {
                 userBag = new Bag(userId);
-                bagDAO.createBag(userBag);
             }
             gameDataManager.setCurrentBag(userBag);
 
@@ -269,11 +329,22 @@ public class MainController {
     private void enterMaze(ActionEvent event) {
         try {
             // 加载迷宫入口窗口
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/mazeEntry.fxml"));
+            java.net.URL resource = getClass().getResource("/mazeEntry.fxml");
+            if (resource == null) {
+                System.err.println("无法找到 /mazeEntry.fxml");
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("错误");
+                a.setHeaderText(null);
+                a.setContentText("找不到迷宫入口资源(mazeEntry.fxml)。");
+                a.showAndWait();
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(resource);
             Parent mazeEntryRoot = loader.load();
             Stage stage = new Stage();
             stage.setTitle("迷宫探索");
             stage.setScene(new Scene(mazeEntryRoot, 400, 300));
+            centerStage(stage);
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
@@ -288,7 +359,12 @@ public class MainController {
             container.getChildren().clear();
             // 重新创建主菜单
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
+                java.net.URL resource = getClass().getResource("/main.fxml");
+                if (resource == null) {
+                    System.err.println("无法找到 /main.fxml");
+                    return;
+                }
+                FXMLLoader loader = new FXMLLoader(resource);
                 Parent mainPage = loader.load();
                 mainPage.setOpacity(0);
                 container.getChildren().add(mainPage);
@@ -302,5 +378,14 @@ public class MainController {
                 e.printStackTrace();
             }
         }
+    }
+
+    // 居中显示窗口
+    private void centerStage(Stage stage) {
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        double centerX = screenBounds.getMinX() + (screenBounds.getWidth() - stage.getWidth()) / 2;
+        double centerY = screenBounds.getMinY() + (screenBounds.getHeight() - stage.getHeight()) / 2;
+        stage.setX(centerX);
+        stage.setY(centerY);
     }
 }

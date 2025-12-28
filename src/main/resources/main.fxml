@@ -34,7 +34,7 @@
                 prefHeight="38.0"
                 prefWidth="104.0"
                 text="继续游戏"
-                onAction="#enterMaze">
+                onAction="#handleContinueGame">
             <font>
                 <Font size="19.0" />
             </font>

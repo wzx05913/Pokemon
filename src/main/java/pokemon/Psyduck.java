@@ -16,9 +16,9 @@ public class Psyduck extends Pokemon {
 
     @Override
     protected void initializeMoves() {
-        moves.add(new Move("抓", 40, 35));
-        moves.add(new Move("水枪", 40, 25));
-        moves.add(new Move("念力", 50, 15));  // 强力但PP少
+        moves.add(new Move("抓", (int) (attack*1.1), 35));
+        moves.add(new Move("水枪", attack, 25));
+        moves.add(new Move("念力", (int) (attack*1.6), 15));  // 强力但PP少
     }
 
     @Override

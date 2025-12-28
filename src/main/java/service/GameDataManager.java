@@ -130,7 +130,50 @@ public class GameDataManager {
         pokemonList.clear();  // 清空宝可梦列表
         isTemporary = false;
     }
-    
+
+    // 减少所有宠物的清洁度（只修改内存全局变量），并同步到 Pokemon 对象
+    public void decreaseAllPetsClean(int amount) {
+        if (pokemonList == null || pokemonList.isEmpty()) {
+            // 退回到对实体列表的处理（保守）
+            if (petList == null) return;
+            for (Pet pet : petList) {
+                if (pet.getClean() == null) pet.setClean(100);
+                int newClean = pet.getClean() - amount;
+                pet.setClean(Math.max(0, newClean));
+                if (pet.getClean() <= 0) pet.setAlive(false);
+            }
+            return;
+        }
+
+        // 优先通过内存中的 Pokemon 实例减少清洁度，并尝试将变更同步回实体 Pet 列表
+        for (Pokemon p : pokemonList) {
+            if (p == null) continue;
+            int cur = p.getClean();
+            int next = Math.max(0, cur - amount);
+            p.setClean(next);
+            if (next <= 0) {
+                p.setAlive(false);
+                p.setHp(0);
+            }
+
+            // 在 petList 中寻找对应实体并同步（通过 Type/Level/Attack 尝试匹配）
+            if (petList != null) {
+                for (Pet pet : petList) {
+                    if (pet == null) continue;
+                    String petType = pet.getType();
+                    String pType = p.getType();
+                    if (petType == null || pType == null) continue;
+                    if (petType.trim().equals(pType.trim())
+                            && pet.getLevel() == p.getLevel()
+                            && pet.getAttack() == p.getAttack()) {
+                        pet.setClean(next);
+                        pet.setAlive(p.isAlive());
+                        break;
+                    }
+                }
+            }
+        }
+    }
     public void setCurrentUserId(int userId) {
         this.currentUserId = userId;
     }

@@ -15,8 +15,8 @@ public class Bulbasaur extends Pokemon {
 
     @Override
     protected void initializeMoves() {
-        moves.add(new Move("藤鞭", 45, 25));
-        moves.add(new Move("撞击", 35, 35));
+        moves.add(new Move("藤鞭", attack, 25));
+        moves.add(new Move("撞击", (int) (attack*1.2), 35));
         moves.add(new Move("生长", 0, 20));  // 特殊技能，提高攻击
     }
 

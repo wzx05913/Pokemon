@@ -14,11 +14,9 @@ public class Move {
     // 计算伤害（简化公式）
     public int calculateDamage(int attackerAttack, int defenderDefense) {
         // 基础伤害 = 威力 + 攻击方攻击力 - 防御方防御力
-        int damage = power + attackerAttack - defenderDefense;
+        int damage = (int) (power + attackerAttack - defenderDefense*0.25);
         return Math.max(1, damage);  // 至少造成1点伤害
     }
-
-
 
     // Getters and Setters
     public String getName() { return name; }

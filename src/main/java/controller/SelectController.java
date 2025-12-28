@@ -17,7 +17,7 @@ public class SelectController {
     private void selectBulbasaur() {
         System.out.println("选择了妙蛙种子");
         if (mainController != null) {
-            mainController.selectPet("BULBASAUR");
+            mainController.selectPet("妙蛙种子");
         }
     }
 
@@ -26,7 +26,7 @@ public class SelectController {
     private void selectCharmander() {
         System.out.println("选择了小火龙");
         if (mainController != null) {
-            mainController.selectPet("CHARMANDER");
+            mainController.selectPet("小火龙");
         }
     }
 
@@ -35,7 +35,7 @@ public class SelectController {
     private void selectPikachu() {
         System.out.println("选择了皮卡丘");
         if (mainController != null) {
-            mainController.selectPet("PIKACHU");
+            mainController.selectPet("皮卡丘");
         }
     }
 }

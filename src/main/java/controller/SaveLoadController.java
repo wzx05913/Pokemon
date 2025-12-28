@@ -15,6 +15,7 @@ import javafx.util.Callback;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javafx.scene.control.ButtonType;
@@ -23,7 +24,7 @@ import javafx.geometry.Pos;
 import Player.Player;
 import pokemon.Pokemon;
 import service.PetFactory;
-
+import service.GameDataManager;
 
 public class SaveLoadController {
 
@@ -51,7 +52,13 @@ public class SaveLoadController {
     private GameDataManager dataManager = GameDataManager.getInstance();
     private Player currentPlayer; // 当前游戏中的玩家
 
-    //初始化方法
+    // 新增：只读模式标志（true 表示只读，禁止保存/删除）
+    private boolean readOnly = false;
+
+    // 新增：主控制器引用，用于读档后跳转页面
+    private MainController mainController;
+
+    // 初始化方法
     @FXML
     public void initialize() {
         currentPlayer = dataManager.getCurrentPlayer();
@@ -285,6 +292,17 @@ public class SaveLoadController {
             loadButton.setDisable(true);
             deleteButton.setDisable(true);
         }
+
+        // 只读模式：禁止保存和删除（但允许读取已经存在的存档）
+        if (readOnly) {
+            saveButton.setDisable(true);
+            deleteButton.setDisable(true);
+            // 如果选中是空位，则读取按钮也应该禁用
+            SaveData sel = saveList.getSelectionModel().getSelectedItem();
+            if (sel == null || sel.getSaveTime() == null) {
+                loadButton.setDisable(true);
+            }
+        }
     }
 
     // 更新状态标签
@@ -338,6 +356,11 @@ public class SaveLoadController {
     // 保存按钮点击事件
     @FXML
     private void onSaveButtonClick() {
+        if (readOnly) {
+            showAlert("提示", "当前为只读模式，无法保存。", AlertType.INFORMATION);
+            return;
+        }
+
         SaveData selectedSave = saveList.getSelectionModel().getSelectedItem();
 
         if (selectedSave == null) {
@@ -388,24 +411,29 @@ public class SaveLoadController {
             showAlert("错误", "玩家ID格式错误", AlertType.ERROR);
         }
     }
+
     private void saveCurrentPlayer(SaveData saveData) throws SQLException {
         // 检查当前玩家是否是临时玩家
-        boolean isTemporaryPlayer = currentPlayer.getId() == -1;
+        boolean isTemporaryPlayer = (currentPlayer == null || currentPlayer.getId() == -1);
 
         User dbUser;
         if (isTemporaryPlayer) {
-            // 临时玩家：创建新的数据库用户
+            // 游客：创建新用户（产生新编号）
             dbUser = userDAO.createUser();
             System.out.println("为临时玩家创建数据库用户，ID: " + dbUser.getUserId());
+            // 将新编号赋给当前玩家
+            currentPlayer.setId(dbUser.getUserId());
         } else {
-            // 已有数据库用户
-            dbUser = userDAO.getUserById(currentPlayer.getId());
+            // 非游客：必须沿用当前编号，不得创建新的ID
+            int expectedId = currentPlayer.getId();
+            dbUser = userDAO.getUserById(expectedId);
             if (dbUser == null) {
-                showAlert("错误", "找不到对应的数据库用户", AlertType.ERROR);
-                return;
+                // 不创建新编号；确保用当前编号插入一条用户记录
+                userDAO.ensureUserExistsWithId(expectedId);
+                dbUser = new User(expectedId);
+                System.out.println("为现有玩家ID补建数据库记录，ID: " + expectedId);
             }
         }
-
         int playerId = dbUser.getUserId();
 
         // 如果玩家是临时的，更新其ID
@@ -413,13 +441,22 @@ public class SaveLoadController {
             currentPlayer.setId(playerId);
         }
 
-        // 保存背包数据
+        // 保存背包数据：优先使用 GameDataManager 中的内存背包
         Bag bag = new Bag();
         bag.setUserId(playerId);
-        bag.setEggCount(0);
-        bag.setRiceCount(0);
-        bag.setSoapCount(0);
-        bag.setCoins(currentPlayer.getMoney());
+        Bag currentBag = dataManager.getPlayerBag();
+        if (currentBag != null) {
+            bag.setEggCount(currentBag.getEggCount());
+            bag.setRiceCount(currentBag.getRiceCount());
+            bag.setSoapCount(currentBag.getSoapCount());
+            bag.setCoins(currentBag.getCoins() != null ? currentBag.getCoins() : currentPlayer.getMoney());
+        } else {
+            // 回退：如果内存没有背包，则使用当前玩家的金币并将物品数设为0
+            bag.setEggCount(0);
+            bag.setRiceCount(0);
+            bag.setSoapCount(0);
+            bag.setCoins(currentPlayer != null ? currentPlayer.getMoney() : 0);
+        }
 
         Bag existingBag = bagDAO.getBagByUserId(playerId);
         if (existingBag != null) {
@@ -440,19 +477,29 @@ public class SaveLoadController {
                 Pet pet = new Pet();
                 pet.setUserId(playerId);
 
-                // 关键修改：使用pokemon.getName()作为数据库的Type
+                // 严格校验：只允许保存带有中文名称的 pokemon.getName()
                 String pokemonName = pokemon.getName();
                 if (pokemonName == null || pokemonName.trim().isEmpty()) {
-                    // 如果没有名称，尝试从Pokemon类获取
-                    pokemonName = pokemon.getClass().getSimpleName();
+                    // 中止保存并通知（不悄悄回退成英文）
+                    showAlert("错误", "宠物名称为空，保存中止。请检查代码中何处将宠物名称清空或设置为非法值。", AlertType.ERROR);
+                    return;
                 }
-                pet.setType(pokemonName);  // 数据库Type = Pokemon的name
+                pokemonName = pokemonName.trim();
+                // 简单校验包含汉字，确保不是英文或其它乱码
+                if (!pokemonName.matches(".*[\\u4e00-\\u9fa5].*")) {
+                    showAlert("错误", "检测到将要保存的宠物名称不是中文: " + pokemonName + "，保存已中止。请排查来源。", AlertType.ERROR);
+                    return;
+                }
+
+                // 仅在通过校验后写入数据库
+                pet.setType(pokemonName);  // 数据库 Type = 中文名称
 
                 pet.setLevel(pokemon.getLevel());
                 pet.setAttack(pokemon.getAttack());
-                pet.setClean(100);
+                // 使用当前内存中 Pokemon 的清洁度和存活状态进行保存
+                pet.setClean(pokemon.getClean());
                 pet.setExperience(pokemon.getExp());
-                pet.setAlive(true);
+                pet.setAlive(pokemon.isAlive());
 
                 System.out.println("保存宠物: 名称=" + pokemonName +
                         ", 等级=" + pokemon.getLevel() +
@@ -483,6 +530,7 @@ public class SaveLoadController {
 
         showAlert("成功", message + "\n存档位置: " + saveData.getSlot(), AlertType.INFORMATION);
     }
+
     @FXML
     private void onLoadButtonClick() {
         SaveData selectedSave = saveList.getSelectionModel().getSelectedItem();
@@ -513,49 +561,63 @@ public class SaveLoadController {
             // 创建Player对象
             Player loadedPlayer = new Player(loadedBag.getCoins(), playerId);
 
-            // 创建Pokemon对象
+            // 创建Pokemon对象并收集到本地列表
+            List<pokemon.Pokemon> createdPokemons = new ArrayList<>();
             if (loadedPets != null && !loadedPets.isEmpty()) {
                 for (Pet pet : loadedPets) {
-                    // 数据库中的Type就是Pokemon的name
                     String petType = pet.getType();
                     if (petType == null || petType.trim().isEmpty()) {
-                        System.err.println("警告：数据库中的宠物Type为空，使用默认值");
                         petType = "Bulbasaur";
                     }
 
-                    System.out.println("从数据库创建宠物: Type=" + petType +
-                            ", 等级=" + pet.getLevel() +
-                            ", 攻击力=" + pet.getAttack());
-
-                    // 使用宠物的Type（即name）创建Pokemon对象
-                    Pokemon pokemon = PetFactory.createPokemonFromDB(
-                            petType,  // 数据库Type = Pokemon的name
-                            pet.getLevel(),
-                            pet.getAttack(),
-                            pet.getExperience()
-                    );
+                        pokemon.Pokemon pokemon = PetFactory.createPokemon(pet);
                     if (pokemon != null) {
                         loadedPlayer.addPet(pokemon);
+                        createdPokemons.add(pokemon);
                     } else {
                         System.err.println("创建宠物失败: Type=" + petType);
                     }
                 }
             }
 
-            // 更新会话状态
-            dataManager.setCurrentPlayer(loadedPlayer);
-            if (loadedPlayer.hasPets()) {
-            	dataManager.setCurrentPokemon(loadedPlayer.getPets().get(0));
+            // --- 关键：将所有读取的数据同步回 GameDataManager ---
+            dataManager.setCurrentPlayer(loadedPlayer);       // 设置当前 Player（会更新 currentUserId）
+            dataManager.setCurrentBag(loadedBag);             // 设置背包信息
+            // 同步实体 Pet 列表到 manager（用于其他模块读取实体列表）
+            dataManager.getPetList().clear();
+            if (loadedPets != null) dataManager.getPetList().addAll(loadedPets);
+            // 同步已创建的 Pokemon 对象到 manager 的 pokemonList
+            // （保留全局可用的 Pokemon 实例，便于界面/战斗复用）
+            // 首先清理旧列表（保证一致性）
+            List<pokemon.Pokemon> existing = dataManager.getPokemonList();
+            existing.clear();
+            for (pokemon.Pokemon p : createdPokemons) {
+                dataManager.addPokemon(p);
             }
+            // 设置当前宝可梦
+            if (!createdPokemons.isEmpty()) {
+                dataManager.setCurrentPokemon(createdPokemons.get(0));
+            } else {
+                dataManager.setCurrentPokemon(null);
+            }
+            // ----------------------------------------------------
 
             // 更新当前玩家引用
             currentPlayer = loadedPlayer;
 
-            // 显示宠物信息
+            // 如果是“继续游戏”从主菜单打开（mainController 不为 null），则关闭窗口并切换到 bedroom-select 页面
+            if (mainController != null) {
+                Stage stage = (Stage) closeButton.getScene().getWindow();
+                stage.close();
+                mainController.switchToPageWithFade("main");
+                return;
+            }
+
+            // 否则显示成功提示并刷新界面
             StringBuilder petInfo = new StringBuilder();
             if (loadedPlayer.hasPets()) {
-                for (Pokemon pokemon : loadedPlayer.getPets()) {
-                    petInfo.append("\n- ").append(pokemon.getName())  // 使用getName()而不是getType()
+                for (pokemon.Pokemon pokemon : loadedPlayer.getPets()) {
+                    petInfo.append("\n- ").append(pokemon.getName())
                             .append(" Lv.").append(pokemon.getLevel());
                 }
             }
@@ -580,6 +642,11 @@ public class SaveLoadController {
     // 删除按钮点击事件
     @FXML
     private void onDeleteButtonClick() {
+        if (readOnly) {
+            showAlert("提示", "当前为只读模式，无法删除存档。", AlertType.INFORMATION);
+            return;
+        }
+
         SaveData selectedSave = saveList.getSelectionModel().getSelectedItem();
 
         if (selectedSave == null || selectedSave.getSaveTime() == null) {
@@ -614,7 +681,7 @@ public class SaveLoadController {
 
                     // 如果删除的是当前玩家
                     if (currentPlayer != null && currentPlayer.getId() == playerId) {
-                    	dataManager.setCurrentPlayer(null);
+                        dataManager.setCurrentPlayer(null);
                         currentPlayer = null;
                     }
 
@@ -653,5 +720,18 @@ public class SaveLoadController {
     public void setCurrentPlayer(Player player) {
         this.currentPlayer = player;
         loadSaveSlots();
+        updateButtonStates();
+    }
+
+    // 新增：设置只读模式（true = 只读）
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+        // 立即刷新按钮状态
+        updateButtonStates();
+    }
+
+    // 新增：设置主控制器引用（用于读档后跳转）
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
     }
 }
