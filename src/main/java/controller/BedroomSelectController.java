@@ -1,7 +1,7 @@
 package controller;
 
 import Player.Player;
-import entity.User;
+
 import java.io.IOException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,17 +9,12 @@ import javafx.geometry.Rectangle2D;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.Node;
 import javafx.stage.Stage;
 import service.GameDataManager;
 import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.scene.Scene;
-import javafx.scene.Parent;
-import javafx.fxml.FXMLLoader;
 import javafx.stage.StageStyle;
 
 
@@ -35,6 +30,8 @@ public class BedroomSelectController {
     private Button outButton;        // 外出按钮
     @FXML
     private Button shopButton;       // 商店按钮
+    @FXML
+    private Button settingsButton;
 
     // 设置MainController引用
     public void setMainController(MainController mainController) {
@@ -79,6 +76,40 @@ public class BedroomSelectController {
             a.setHeaderText(null);
             a.setContentText("无法打开宠物管理界面：" + e.getMessage());
             a.showAndWait();
+        }
+    }
+
+    @FXML
+    private void onsettingsButtonClick() {
+        opensettingsWindow();
+    }
+
+    private void opensettingsWindow() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/settingswidget.fxml"));
+            Parent saveLoadRoot = loader.load();
+
+            // 获取设置窗口的控制器
+            SettingsController settingsController = loader.getController();
+
+            // 传递主控制器引用
+            settingsController.setMainController(mainController);
+
+            Stage settingsStage = new Stage();
+            settingsStage.initModality(Modality.WINDOW_MODAL);
+            settingsStage.initOwner(settingsButton.getScene().getWindow());
+            settingsStage.initStyle(StageStyle.UTILITY);
+            settingsStage.setTitle("设置");
+
+            Scene scene = new Scene(saveLoadRoot);
+            settingsStage.setScene(scene);
+            settingsStage.setResizable(false);
+
+            settingsStage.centerOnScreen();
+            settingsStage.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("错误", "无法打开设置界面：" + e.getMessage());
         }
     }
 
@@ -206,13 +237,6 @@ public class BedroomSelectController {
     }
 
     // 返回主菜单
-    @FXML
-    private void onBackButtonClick() {
-        System.out.println("返回主菜单");
-        if (mainController != null) {
-            mainController.backToMain();
-        }
-    }
 
     // 显示提示信息
     private void showAlert(String title, String content) {

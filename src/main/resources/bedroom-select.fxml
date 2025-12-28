@@ -16,44 +16,32 @@
         </ImageView>
 
         <!-- 宠物按钮 -->
-        <Button onAction="#onPetButtonClick" fx:id="petButton"
-                layoutX="615.0" layoutY="458.0" mnemonicParsing="false"
-                prefHeight="30.0" prefWidth="78.0" text="宠物"
-                style="-fx-background-color: #6b4fbb; -fx-border-color: #000000; -fx-border-width: 3px; -fx-text-fill: #ffffff; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;">
+        <Button fx:id="petButton" layoutX="615.0" layoutY="458.0" mnemonicParsing="false" onAction="#onPetButtonClick" prefHeight="30.0" prefWidth="78.0" style="-fx-background-color: #6b4fbb; -fx-border-color: #000000; -fx-border-width: 3px; -fx-text-fill: #ffffff; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="宠物">
             <font>
                 <Font name="Ark Pixel" size="12.0" />
             </font>
         </Button>
 
         <!-- 休息按钮 -->
-        <Button onAction="#onRestButtonClick" fx:id="restButton"
-                layoutX="183.0" layoutY="417.0" mnemonicParsing="false"
-                prefHeight="30.0" prefWidth="100.0" text="休息（存档）"
-                textFill="#695050" textOverrun="LEADING_WORD_ELLIPSIS"
-                style="-fx-background-color: #2d2d2d; -fx-border-color: #000000; -fx-border-width: 4px; -fx-border-style: segments(2, 2); -fx-text-fill: #ffffff; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-cursor: hand;">
+        <Button fx:id="restButton" layoutX="183.0" layoutY="417.0" mnemonicParsing="false" onAction="#onRestButtonClick" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #2d2d2d; -fx-border-color: #000000; -fx-border-width: 4px; -fx-border-style: segments(2, 2); -fx-text-fill: #ffffff; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-cursor: hand;" text="休息（存档）" textFill="#695050" textOverrun="LEADING_WORD_ELLIPSIS">
             <font>
                 <Font name="Ark Pixel" size="12.0" />
             </font>
         </Button>
 
         <!-- 外出按钮 -->
-        <Button onAction="#onOutButtonClick" fx:id="outButton"
-                layoutX="400.0" layoutY="365.0" mnemonicParsing="false"
-                prefHeight="30.0" prefWidth="78.0" text="外出"
-                style="-fx-background-color: #4a90e2; -fx-border-color: #1a3a5f; -fx-border-width: 3px; -fx-text-fill: #f0f0f0; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;">
+        <Button fx:id="outButton" layoutX="400.0" layoutY="365.0" mnemonicParsing="false" onAction="#onOutButtonClick" prefHeight="30.0" prefWidth="78.0" style="-fx-background-color: #4a90e2; -fx-border-color: #1a3a5f; -fx-border-width: 3px; -fx-text-fill: #f0f0f0; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="外出">
             <font>
                 <Font name="Ark Pixel" size="12.0" />
             </font>
         </Button>
 
         <!-- 商店按钮 -->
-        <Button onAction="#onShopButtonClick" fx:id="shopButton"
-                layoutX="681.0" layoutY="25.0" mnemonicParsing="false"
-                prefHeight="30.0" prefWidth="78.0" text="商店"
-                style="-fx-background-color: #ff6b6b; -fx-border-color: #b33a3a; -fx-border-width: 3px; -fx-text-fill: #ffffff; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;">
+        <Button fx:id="shopButton" layoutX="681.0" layoutY="25.0" mnemonicParsing="false" onAction="#onShopButtonClick" prefHeight="30.0" prefWidth="78.0" style="-fx-background-color: #ff6b6b; -fx-border-color: #b33a3a; -fx-border-width: 3px; -fx-text-fill: #ffffff; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="商店">
             <font>
                 <Font name="Ark Pixel" size="12.0" />
             </font>
         </Button>
+      <Button fx:id="settingsButton" layoutX="38.0" layoutY="25.0" mnemonicParsing="false" text="设置" onAction="#onsettingsButtonClick"/>
     </children>
 </AnchorPane>
