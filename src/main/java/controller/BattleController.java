@@ -1,5 +1,6 @@
 package controller;
 
+import Player.Player;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -351,20 +352,51 @@ public class BattleController {
         if (battleManager.getBattleResult() == BattleResult.PLAYER_WIN) {
             battleResultLabel.setText("你赢了！获得了30金币！");
             if (!coinsAwarded) {
-                GameDataManager.getInstance().addCoins(30);
-                // 同步到 currentPlayer 的 money 显示
-                if (GameDataManager.getInstance().getCurrentPlayer() != null) {
-                    Integer coins = GameDataManager.getInstance().getPlayerBag() != null ?
-                            GameDataManager.getInstance().getPlayerBag().getCoins() : null;
-                    if (coins != null) {
-                        GameDataManager.getInstance().getCurrentPlayer().setMoney(coins);
+                // 修复金币发放逻辑
+                try {
+                    Bag playerBag = GameDataManager.getInstance().getPlayerBag();
+                    if (playerBag == null) {
+                        // 如果Bag为null，创建新的Bag
+                        int userId = GameDataManager.getInstance().getCurrentUserId();
+                        playerBag = new Bag(userId);
+                        playerBag.setCoins(0); // 确保coins不为null
+                        GameDataManager.getInstance().setCurrentBag(playerBag);
+                        System.out.println("DEBUG: 创建了新Bag");
                     }
+
+                    // 确保coins不为null
+                    Integer coins = playerBag.getCoins();
+                    if (coins == null) {
+                        coins = 0;
+                        playerBag.setCoins(coins);
+                        System.out.println("DEBUG: 初始化coins为0");
+                    }
+
+                    // 添加金币
+                    GameDataManager.getInstance().addCoins(30);
+                    System.out.println("DEBUG: 成功添加30金币，当前金币: " + playerBag.getCoins());
+
+                    // 同步到currentPlayer的money显示
+                    Player currentPlayer = GameDataManager.getInstance().getCurrentPlayer();
+                    if (currentPlayer != null) {
+                        Integer updatedCoins = GameDataManager.getInstance().getPlayerBag().getCoins();
+                        currentPlayer.setMoney(updatedCoins != null ? updatedCoins : 0);
+                        System.out.println("DEBUG: 同步金币到玩家显示");
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("发放金币时发生错误: " + e.getMessage());
+                    e.printStackTrace();
                 }
                 coinsAwarded = true;
             }
+
+            // 尝试捕获敌人
             boolean caught = battleManager.tryCatchEnemy();
             if (caught) {
                 battleResultLabel.setText(battleResultLabel.getText() + "\n成功捕获了敌人的宝可梦！");
+            } else {
+                battleResultLabel.setText(battleResultLabel.getText() + "\n捕获失败！");
             }
         } else {
             battleResultLabel.setText("你输了！");

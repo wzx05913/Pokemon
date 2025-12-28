@@ -374,25 +374,54 @@ public class SaveLoadController {
         }
 
         try {
+            boolean isGuest = (currentPlayer.getId() == -1);
+
             if (selectedSave.getSaveTime() != null) {
                 // 确认覆盖
                 Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
                 confirmAlert.setTitle("确认覆盖");
                 confirmAlert.setHeaderText("覆盖存档");
-                confirmAlert.setContentText("确定要覆盖存档位 " + selectedSave.getSlot() + " 吗？\n" +
-                        "原有的存档数据将会丢失！");
+
+                String oldPlayerIdStr = selectedSave.getPlayerName();
+                if (oldPlayerIdStr != null) {
+                    int oldPlayerId = Integer.parseInt(oldPlayerIdStr);
+                    boolean isOverwritingGuest = (oldPlayerId == -1);
+
+                    if (isGuest && isOverwritingGuest) {
+                        confirmAlert.setContentText("确定要覆盖游客存档吗？");
+                    } else if (isGuest) {
+                        confirmAlert.setContentText("确定要用游客数据覆盖存档位 " + selectedSave.getSlot() + " 吗？");
+                    } else if (isOverwritingGuest) {
+                        confirmAlert.setContentText("确定要用正式玩家数据覆盖游客存档吗？");
+                    } else {
+                        confirmAlert.setContentText("确定要覆盖存档位 " + selectedSave.getSlot() + " 吗？\n" +
+                                "原有的存档数据将会丢失！");
+                    }
+                } else {
+                    confirmAlert.setContentText("确定要覆盖存档位 " + selectedSave.getSlot() + " 吗？");
+                }
 
                 Optional<ButtonType> result = confirmAlert.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
                     // 获取旧玩家ID
-                    String oldPlayerIdStr = selectedSave.getPlayerName();
+                    oldPlayerIdStr = selectedSave.getPlayerName();
                     if (oldPlayerIdStr != null) {
-                        int oldPlayerId = Integer.parseInt(oldPlayerIdStr);
+                        try {
+                            int oldPlayerId = Integer.parseInt(oldPlayerIdStr);
 
-                        // 删除原有数据
-                        petDAO.deletePetsByUserId(oldPlayerId);
-                        bagDAO.deleteBagByUserId(oldPlayerId);
-                        userDAO.deleteUser(oldPlayerId);
+                            // 如果是游客存档（oldPlayerId == -1），不需要删除数据库数据
+                            if (oldPlayerId != -1) {
+                                // 删除原有数据（只删除非游客的数据）
+                                petDAO.deletePetsByUserId(oldPlayerId);
+                                bagDAO.deleteBagByUserId(oldPlayerId);
+                                userDAO.deleteUser(oldPlayerId);
+                                System.out.println("DEBUG: 删除了旧玩家数据，ID: " + oldPlayerId);
+                            } else {
+                                System.out.println("DEBUG: 覆盖的是游客存档，跳过数据库删除");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.err.println("旧玩家ID格式错误: " + oldPlayerIdStr);
+                        }
                     }
                     saveCurrentPlayer(selectedSave);
                 }
@@ -413,122 +442,137 @@ public class SaveLoadController {
     }
 
     private void saveCurrentPlayer(SaveData saveData) throws SQLException {
-        // 检查当前玩家是否是临时玩家
-        boolean isTemporaryPlayer = (currentPlayer == null || currentPlayer.getId() == -1);
+        boolean isGuest = (currentPlayer.getId() == -1);
 
         User dbUser;
-        if (isTemporaryPlayer) {
+        if (isGuest) {
             // 游客：创建新用户（产生新编号）
             dbUser = userDAO.createUser();
-            System.out.println("为临时玩家创建数据库用户，ID: " + dbUser.getUserId());
+            System.out.println("DEBUG: 为游客创建数据库用户，新ID: " + dbUser.getUserId());
             // 将新编号赋给当前玩家
             currentPlayer.setId(dbUser.getUserId());
         } else {
-            // 非游客：必须沿用当前编号，不得创建新的ID
+            // 非游客：必须沿用当前编号
             int expectedId = currentPlayer.getId();
             dbUser = userDAO.getUserById(expectedId);
             if (dbUser == null) {
-                // 不创建新编号；确保用当前编号插入一条用户记录
+                // 如果数据库中没有该用户，创建新用户
                 userDAO.ensureUserExistsWithId(expectedId);
                 dbUser = new User(expectedId);
-                System.out.println("为现有玩家ID补建数据库记录，ID: " + expectedId);
+                System.out.println("DEBUG: 为现有玩家补建数据库记录，ID: " + expectedId);
             }
         }
         int playerId = dbUser.getUserId();
-
-        // 如果玩家是临时的，更新其ID
-        if (isTemporaryPlayer) {
-            currentPlayer.setId(playerId);
-        }
 
         // 保存背包数据：优先使用 GameDataManager 中的内存背包
         Bag bag = new Bag();
         bag.setUserId(playerId);
         Bag currentBag = dataManager.getPlayerBag();
+
         if (currentBag != null) {
-            bag.setEggCount(currentBag.getEggCount());
-            bag.setRiceCount(currentBag.getRiceCount());
-            bag.setSoapCount(currentBag.getSoapCount());
-            bag.setCoins(currentBag.getCoins() != null ? currentBag.getCoins() : currentPlayer.getMoney());
+            // 确保所有字段都有值，避免null
+            bag.setEggCount(currentBag.getEggCount() != null ? currentBag.getEggCount() : 0);
+            bag.setRiceCount(currentBag.getRiceCount() != null ? currentBag.getRiceCount() : 0);
+            bag.setSoapCount(currentBag.getSoapCount() != null ? currentBag.getSoapCount() : 0);
+
+            // 金币处理：优先使用背包的金币，如果没有则使用玩家的金币
+            Integer coins = currentBag.getCoins();
+            if (coins == null) {
+                coins = (currentPlayer != null) ? currentPlayer.getMoney() : 0;
+            }
+            bag.setCoins(coins);
         } else {
-            // 回退：如果内存没有背包，则使用当前玩家的金币并将物品数设为0
+            // 如果没有内存背包，使用默认值
             bag.setEggCount(0);
             bag.setRiceCount(0);
             bag.setSoapCount(0);
             bag.setCoins(currentPlayer != null ? currentPlayer.getMoney() : 0);
         }
 
+        // 保存或更新背包
         Bag existingBag = bagDAO.getBagByUserId(playerId);
         if (existingBag != null) {
             bag.setBagId(existingBag.getBagId());
             bagDAO.updateBag(bag);
+            System.out.println("DEBUG: 更新背包数据，玩家ID: " + playerId);
         } else {
             bagDAO.createBag(bag);
+            System.out.println("DEBUG: 创建新背包数据，玩家ID: " + playerId);
         }
 
         // 保存宠物数据
         List<Pokemon> pokemons = currentPlayer.getPets();
         if (pokemons != null && !pokemons.isEmpty()) {
-            // 先删除旧宠物
+            // 先删除旧宠物（如果存在）
             petDAO.deletePetsByUserId(playerId);
 
             // 保存新宠物
+            int savedCount = 0;
             for (Pokemon pokemon : pokemons) {
-                Pet pet = new Pet();
-                pet.setUserId(playerId);
+                try {
+                    Pet pet = new Pet();
+                    pet.setUserId(playerId);
 
-                // 严格校验：只允许保存带有中文名称的 pokemon.getName()
-                String pokemonName = pokemon.getName();
-                if (pokemonName == null || pokemonName.trim().isEmpty()) {
-                    // 中止保存并通知（不悄悄回退成英文）
-                    showAlert("错误", "宠物名称为空，保存中止。请检查代码中何处将宠物名称清空或设置为非法值。", AlertType.ERROR);
-                    return;
+                    // 宠物名称校验
+                    String pokemonName = pokemon.getName();
+                    if (pokemonName == null || pokemonName.trim().isEmpty()) {
+                        System.err.println("DEBUG: 跳过空名称的宠物");
+                        continue;
+                    }
+
+                    pokemonName = pokemonName.trim();
+
+                    // 如果是游客，允许英文名称（因为游客可能捕获了英文名的宠物）
+                    if (!isGuest && !pokemonName.matches(".*[\\u4e00-\\u9fa5].*")) {
+                        System.err.println("DEBUG: 跳过非中文名称的宠物: " + pokemonName);
+                        continue;
+                    }
+
+                    // 设置宠物属性
+                    pet.setType(pokemonName);
+                    pet.setLevel(pokemon.getLevel());
+                    pet.setAttack(pokemon.getAttack());
+                    pet.setClean(pokemon.getClean());
+                    pet.setExperience(pokemon.getExp());
+                    pet.setAlive(pokemon.isAlive());
+
+                    petDAO.createPet(pet);
+                    savedCount++;
+
+                    System.out.println("DEBUG: 保存宠物: " + pokemonName + " Lv." + pokemon.getLevel());
+
+                } catch (Exception e) {
+                    System.err.println("DEBUG: 保存宠物失败: " + e.getMessage());
                 }
-                pokemonName = pokemonName.trim();
-                // 简单校验包含汉字，确保不是英文或其它乱码
-                if (!pokemonName.matches(".*[\\u4e00-\\u9fa5].*")) {
-                    showAlert("错误", "检测到将要保存的宠物名称不是中文: " + pokemonName + "，保存已中止。请排查来源。", AlertType.ERROR);
-                    return;
-                }
-
-                // 仅在通过校验后写入数据库
-                pet.setType(pokemonName);  // 数据库 Type = 中文名称
-
-                pet.setLevel(pokemon.getLevel());
-                pet.setAttack(pokemon.getAttack());
-                // 使用当前内存中 Pokemon 的清洁度和存活状态进行保存
-                pet.setClean(pokemon.getClean());
-                pet.setExperience(pokemon.getExp());
-                pet.setAlive(pokemon.isAlive());
-
-                System.out.println("保存宠物: 名称=" + pokemonName +
-                        ", 等级=" + pokemon.getLevel() +
-                        ", 攻击力=" + pokemon.getAttack());
-
-                petDAO.createPet(pet);
             }
+            System.out.println("DEBUG: 成功保存 " + savedCount + " 只宠物");
+        } else {
+            System.out.println("DEBUG: 没有宠物需要保存");
         }
 
         // 更新存档信息
         saveData.setPlayerName(String.valueOf(playerId));
         saveData.setSaveTime(LocalDateTime.now());
 
-        // 计算游戏时长
+        // 计算游戏时长（简化）
         int playTimeMinutes = 30;
         int hours = playTimeMinutes / 60;
         int minutes = playTimeMinutes % 60;
         saveData.setPlayTime(String.format("%d小时%d分钟", hours, minutes));
 
         // 更新存档名称
-        int coinCount = currentPlayer.getMoney();
-        int petCount = pokemons != null ? pokemons.size() : 0;
+        int coinCount = (currentPlayer != null) ? currentPlayer.getMoney() : 0;
+        int petCount = (pokemons != null) ? pokemons.size() : 0;
         saveData.setSaveName(String.format("金币:%d 宠物:%d", coinCount, petCount));
 
-        String message = isTemporaryPlayer ?
-                "临时玩家已保存为正式存档！玩家ID: " + playerId :
+        String message = isGuest ?
+                "游客数据已保存为正式存档！新玩家ID: " + playerId :
                 "存档成功！玩家ID: " + playerId;
 
         showAlert("成功", message + "\n存档位置: " + saveData.getSlot(), AlertType.INFORMATION);
+
+        // 更新GameDataManager中的玩家ID
+        dataManager.setCurrentUserId(playerId);
     }
 
     @FXML

@@ -38,12 +38,12 @@ public class BattleManager {
         // 复制宠物列表并按等级降序排列
         playerQueue = new LinkedList<>();
         List<Pokemon> playerPokemons = petList.stream()
-            // 只使用数据库/实体中标记为存活的宠物
-            .filter(pet -> java.lang.Boolean.TRUE.equals(pet.getAlive()))
-            .map(PokemonFactory::createPokemon)
-            .filter(p -> p != null && p.isAlive())
-            .sorted((p1, p2) -> Integer.compare(p2.getLevel(), p1.getLevel()))
-            .collect(Collectors.toList());
+                // 只使用数据库/实体中标记为存活的宠物
+                .filter(pet -> java.lang.Boolean.TRUE.equals(pet.getAlive()))
+                .map(PokemonFactory::createPokemon)
+                .filter(p -> p != null && p.isAlive())
+                .sorted((p1, p2) -> Integer.compare(p2.getLevel(), p1.getLevel()))
+                .collect(Collectors.toList());
 
         playerQueue.addAll(playerPokemons);
 
@@ -118,8 +118,6 @@ public class BattleManager {
                 return new Pikachu(level); // 默认皮卡丘
         }
     }
-
-
 
     // Helper：移除队列头部所有已濒死的宝可梦（避免死的回到队列）
     private void removeFaintedFromQueue(Queue<Pokemon> q) {
@@ -328,7 +326,7 @@ public class BattleManager {
 
     /**
      * 自动推进：当玩家回合但玩家无法行动（睡眠或PP耗尽）时自动跳过并在需要时立即触发敌方回合；
-     * 或当敌人回合并敌人也无法行动时处理回复。 控制器可调用该方法来在 UI 更新后让战斗“自动走一步”。
+     * 或当敌人回合并敌人也无法行动时处理回复。 控制器可调用该方法来在 UI 更新后让战斗"自动走一步"。
      * 返回非空 BattleStepResult 表示有要追加到日志的消息。
      */
     public BattleStepResult handleAutoTurn() {
@@ -397,7 +395,6 @@ public class BattleManager {
         return false;
     }
 
-    // 尝试捕获敌人（不变）
     public boolean tryCatchEnemy() {
         if (battleResult != BattleResult.PLAYER_WIN) {
             return false;
@@ -406,45 +403,101 @@ public class BattleManager {
         Pokemon enemy = lastDefeatedEnemy != null ? lastDefeatedEnemy : currentEnemyPokemon;
         if (enemy == null) return false;
 
-        if (random.nextDouble() <= 0.3) {
-            int userId = GameDataManager.getInstance().getCurrentUserId();
-            entity.Pet newPet = service.PetFactory.createPetEntity(userId, enemy);
+        // 检查是否为游客账号（userid=-1），如果是游客账号也允许捕获
+        int userId = GameDataManager.getInstance().getCurrentUserId();
+        boolean isGuest = (userId == -1);
 
-            if (userId > 0) {
-                try {
-                    database.PetDAO petDAO = new database.PetDAO();
-                    petDAO.createPet(newPet);
-                } catch (java.sql.SQLException e) {
-                    System.err.println("捕获后保存到数据库失败: " + e.getMessage());
+        if (random.nextDouble() <= 1) {
+            try {
+                // 创建宠物实体（但不保存到数据库）
+                entity.Pet newPet = service.PetFactory.createPetEntity(userId, enemy);
+
+                // 生成正数ID（模拟数据库自增）
+                int newPetId = generateNewPetId();
+                // 使用反射设置ID，因为Pet类可能没有setId方法
+                setPetId(newPet, newPetId);
+
+                // 添加到内存中的宠物列表
+                List<Pet> petList = GameDataManager.getInstance().getPetList();
+                if (petList != null) {
+                    petList.add(newPet);
+                    System.out.println("DEBUG: 新宠物已添加到列表，当前宠物数量: " + petList.size());
                 }
-            }
 
-            GameDataManager.getInstance().getPetList().add(newPet);
-
-            if (GameDataManager.getInstance().getCurrentPlayer() != null) {
-                try {
+                // 创建Pokemon对象并添加到当前玩家的内存数据中
+                if (GameDataManager.getInstance().getCurrentPlayer() != null) {
                     pokemon.Pokemon created = service.PetFactory.createPokemon(newPet);
                     if (created != null) {
                         GameDataManager.getInstance().getCurrentPlayer().addPet(created);
-                        // 确保全局的 pokemonList 也包含该实例，便于后续内存同步（如清洁度变化）
+
+                        // 添加到全局的pokemonList（内存中）
                         try {
                             GameDataManager.getInstance().addPokemon(created);
+                            System.out.println("DEBUG: 新Pokemon已添加到玩家和全局列表");
                         } catch (Exception ex) {
                             System.err.println("将捕获的宠物加入全局 pokemonList 失败: " + ex.getMessage());
                         }
                     }
-                } catch (Exception ex) {
-                    System.err.println("将捕获的宠物加入Player失败: " + ex.getMessage());
                 }
-            }
 
-            lastDefeatedEnemy = null;
-            System.out.println("DEBUG: 捕获成功: " + enemy.getName());
-            return true;
+                lastDefeatedEnemy = null;
+                System.out.println("DEBUG: 捕获成功: " + enemy.getName() + " (ID: " + newPetId + ")" + (isGuest ? " (游客账号)" : ""));
+                return true;
+            } catch (Exception ex) {
+                System.err.println("捕获宠物时发生错误: " + ex.getMessage());
+                ex.printStackTrace();
+                return false;
+            }
         } else {
             System.out.println("DEBUG: 捕获失败（未触发概率）");
         }
         return false;
+    }
+
+    // 生成新的宠物ID（基于现有宠物列表的大小）
+    private int generateNewPetId() {
+        List<Pet> petList = GameDataManager.getInstance().getPetList();
+        if (petList == null || petList.isEmpty()) {
+            return 1; // 第一个宠物
+        }
+
+        // 简单的基于列表大小的ID生成
+        int newId = petList.size() + 1;
+        System.out.println("DEBUG: 生成新宠物ID: " + newId + " (基于列表大小: " + petList.size() + ")");
+        return newId;
+    }
+
+    // 使用反射设置Pet的ID（因为Pet类可能没有setId方法）
+    private void setPetId(Pet pet, int id) {
+        try {
+            // 先尝试setId方法
+            try {
+                java.lang.reflect.Method setIdMethod = pet.getClass().getMethod("setId", int.class);
+                setIdMethod.invoke(pet, id);
+                return;
+            } catch (NoSuchMethodException e) {
+                // 如果setId方法不存在，尝试直接设置id字段
+                try {
+                    java.lang.reflect.Field idField = pet.getClass().getDeclaredField("id");
+                    idField.setAccessible(true);
+                    idField.set(pet, id);
+                    return;
+                } catch (NoSuchFieldException e2) {
+                    // 如果id字段也不存在，尝试petId字段
+                    try {
+                        java.lang.reflect.Field petIdField = pet.getClass().getDeclaredField("petId");
+                        petIdField.setAccessible(true);
+                        petIdField.set(pet, id);
+                        return;
+                    } catch (NoSuchFieldException e3) {
+                        // 如果都没有，记录警告但继续执行
+                        System.out.println("WARN: Pet类没有找到id或petId字段，无法设置ID");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("设置宠物ID时发生错误: " + e.getMessage());
+        }
     }
 
     public BattleStepResult playerBasicAttack() {

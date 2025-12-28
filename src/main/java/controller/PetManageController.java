@@ -1,6 +1,5 @@
 package controller;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import entity.Bag;
@@ -342,7 +341,6 @@ public class PetManageController {
             showAlert("提示", "蛋的数量不足");
             return;
         }
-
         // 更新Pet
         selectedPet.setAlive(true);
 
@@ -352,17 +350,6 @@ public class PetManageController {
         }
 
         playerBag.setEggCount(playerBag.getEggCount() - 1);
-
-        try {
-            database.PetDAO petDAO = new database.PetDAO();
-            petDAO.updatePet(selectedPet);
-
-            database.BagDAO bagDAO = new database.BagDAO();
-            bagDAO.updateBag(playerBag);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("错误", "数据库更新失败：" + e.getMessage());
-        }
 
         // 刷新界面
         loadPetList();
@@ -403,17 +390,6 @@ public class PetManageController {
         // 减少背包中的肥皂数量
         playerBag.setSoapCount(playerBag.getSoapCount() - 1);
 
-        // 更新数据库
-        try {
-            database.PetDAO petDAO = new database.PetDAO();
-            petDAO.updatePet(selectedPet);
-
-            database.BagDAO bagDAO = new database.BagDAO();
-            bagDAO.updateBag(playerBag);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("错误", "数据库更新失败：" + e.getMessage());
-        }
 
         // 刷新界面
         loadPetList();
@@ -436,17 +412,13 @@ public class PetManageController {
             return;
         }
 
-        // 计算新经验
         int currentExp = selectedPet.getExperience() != null ? selectedPet.getExperience() : 0;
         int newExp = currentExp + 100;
 
-        // 更新Pet
         selectedPet.setExperience(newExp);
 
-        // 更新Pokemon（如果需要升级）
         if (selectedPokemon != null) {
             selectedPokemon.setExp(newExp);
-            // 检查升级逻辑（简化）
             while (selectedPokemon.getExp() >= selectedPokemon.getExpToNextLevel()) {
                 selectedPokemon.levelUp();
                 selectedPet.setLevel(selectedPokemon.getLevel());
@@ -454,17 +426,6 @@ public class PetManageController {
         }
 
         playerBag.setRiceCount(playerBag.getRiceCount() - 1);
-
-        try {
-            database.PetDAO petDAO = new database.PetDAO();
-            petDAO.updatePet(selectedPet);
-
-            database.BagDAO bagDAO = new database.BagDAO();
-            bagDAO.updateBag(playerBag);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("错误", "数据库更新失败：" + e.getMessage());
-        }
 
         // 刷新界面
         loadPetList();
