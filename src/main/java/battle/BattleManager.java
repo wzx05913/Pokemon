@@ -176,6 +176,10 @@ public class BattleManager {
                 message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，降低了敌方的攻击！";
             } else if ("唱歌".equals(move.getName()) || "唱".equals(move.getName())) {
                 message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，敌方陷入了一回合睡眠！";
+            } else if ("生长".equals(move.getName())) {
+                message = currentPlayerPokemon.getName() + " 使用了 生长，提升了自身攻击！";
+            } else if ("缩入壳中".equals(move.getName())) {
+                message = currentPlayerPokemon.getName() + " 使用了 缩入壳中，提升了自身防御！";
             } else {
                 message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，技能效果生效！";
             }
@@ -267,6 +271,10 @@ public class BattleManager {
                 message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 " + bestMove.getName() + "，降低了你的攻击！";
             } else if ("唱歌".equals(bestMove.getName()) || "唱".equals(bestMove.getName())) {
                 message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 " + bestMove.getName() + "，你进入睡眠！";
+            } else if ("生长".equals(bestMove.getName())) {
+                message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 生长，提升了自身攻击！";
+            } else if ("缩入壳中".equals(bestMove.getName())) {
+                message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 缩入壳中，提升了自身防御！";
             } else {
                 message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 " + bestMove.getName() + "（效果生效）";
             }

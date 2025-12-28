@@ -78,7 +78,7 @@ public abstract class Pokemon {
     }
 
     // 可选：在 setHp 中记录来自哪里（用于进一步调试）
-// 这是可选的调试代码，如果你愿意可以临时加入，便于追踪谁在恢复 HP
+    // 这是可选的调试代码，如果你愿意可以临时加入，便于追踪谁在恢复 HP
     public void setHp(int hp) {
         // 保持原有逻辑，仍然允许设置 hp（但是 fullHeal 禁止）
         this.hp = Math.min(hp, maxHp);
@@ -132,7 +132,7 @@ public abstract class Pokemon {
      * 使用技能（带PP检查和消耗）
      * 返回值含义：
      *  -1 表示无法使用（PP 或 状态阻止）
-     *   0 表示没有造成伤害但效果生效（如催眠、降攻）
+     *   0 表示没有造成伤害但效果生效（如催眠、降攻、加攻、加防）
      *  >0 表示造成的伤害值
      */
     public int useMove(int moveIndex, Pokemon target) {
@@ -157,13 +157,27 @@ public abstract class Pokemon {
             String moveName = move.getName();
             if ("叫声".equals(moveName)) {
                 // 降低目标攻击（不可低于1）
-                target.reduceAttack(5);
-                System.out.println(name + " 使用了 叫声，降低了 " + target.getName() + " 的攻击！");
+                if (target != null) {
+                    target.reduceAttack(5);
+                    System.out.println(name + " 使用了 叫声，降低了 " + target.getName() + " 的攻击！");
+                }
                 return 0;
             } else if ("唱歌".equals(moveName) || "唱".equals(moveName)) {
                 // 使对方沉睡一回合
-                target.setAsleep(1);
-                System.out.println(name + " 唱起了催眠曲，" + target.getName() + " 进入了睡眠！");
+                if (target != null) {
+                    target.setAsleep(1);
+                    System.out.println(name + " 唱起了催眠曲，" + target.getName() + " 进入了睡眠！");
+                }
+                return 0;
+            } else if ("生长".equals(moveName)) {
+                // 提高自身攻击
+                this.increaseAttack(5);
+                System.out.println(name + " 使用了 生长，提升了自身攻击！");
+                return 0;
+            } else if ("缩入壳中".equals(moveName)) {
+                // 提高自身防御
+                this.increaseDefense(5);
+                System.out.println(name + " 使用了 缩入壳中，提升了自身防御！");
                 return 0;
             } else {
                 // 普通伤害技能
@@ -215,6 +229,16 @@ public abstract class Pokemon {
     // 降低攻击（用于“叫声”等技能）
     public void reduceAttack(int amount) {
         this.attack = Math.max(1, this.attack - amount);
+    }
+
+    // 提高攻击（用于“生长”等技能）
+    public void increaseAttack(int amount) {
+        this.attack = Math.max(1, this.attack + amount);
+    }
+
+    // 提高防御（用于“缩入壳中”等技能）
+    public void increaseDefense(int amount) {
+        this.defense = Math.max(1, this.defense + amount);
     }
 
     // 获取信息
