@@ -18,8 +18,6 @@ public class Move {
         return Math.max(1, damage);  // 至少造成1点伤害
     }
 
-
-
     // Getters and Setters
     public String getName() { return name; }
     public int getPower() { return power; }

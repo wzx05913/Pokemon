@@ -16,9 +16,9 @@ public class Jigglypuff extends Pokemon {
 
     @Override
     protected void initializeMoves() {
-        moves.add(new Move("拍击", 35, 35));
-        moves.add(new Move("唱歌", 0, 15));    // 特殊技能：可能使对手睡眠
-        moves.add(new Move("连环巴掌", 15, 10)); // 特殊：多次攻击
+        moves.add(new Move("拍击", (int) (attack*1.3), 35));
+        moves.add(new Move("唱歌", 0, 10));    // 特殊技能：可能使对手睡眠
+        moves.add(new Move("连环巴掌", attack, 15)); // 特殊：多次攻击
     }
 
     @Override

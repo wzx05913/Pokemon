@@ -16,8 +16,8 @@ public class Squirtle extends Pokemon {
 
     @Override
     protected void initializeMoves() {
-        moves.add(new Move("水枪", 40, 25));
-        moves.add(new Move("撞击", 35, 35));
+        moves.add(new Move("水枪", attack, 25));
+        moves.add(new Move("撞击", (int) (attack*1.4), 35));
         moves.add(new Move("缩入壳中", 0, 20));  // 特殊技能，提高防御
     }
 

@@ -15,8 +15,8 @@ public class Charmander extends Pokemon {
 
     @Override
     protected void initializeMoves() {
-        moves.add(new Move("火花", 40, 25));
-        moves.add(new Move("抓", 40, 35));
+        moves.add(new Move("火花", attack, 25));
+        moves.add(new Move("抓", (int) (attack*1.4), 35));
         moves.add(new Move("叫声", 0, 20));  // 特殊技能，可能降低对方攻击
     }
 
