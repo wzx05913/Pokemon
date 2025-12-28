@@ -9,12 +9,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #f0f0f0;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MazeController">
+<BorderPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #f0f0f0;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MazeController">
 
     <!-- 顶部：退出按钮 -->
     <top>
         <HBox spacing="8" style="-fx-padding:8;">
-            <Button onAction="#onExitExploration" text="退出探索" focusTraversable="false"/>
+            <Button focusTraversable="false" onAction="#onExitExploration" text="退出探索" />
         </HBox>
     </top>
 
@@ -37,7 +37,10 @@
                 <StackPane prefHeight="20" prefWidth="20">
                     <Label style="-fx-background-color: red; -fx-background-radius: 10; -fx-min-width:12; -fx-min-height:12;" />
                 </StackPane>
-                <Label text="你（玩家）" />
+                <Label text="你（玩家）">
+               <font>
+                  <Font size="14.0" />
+               </font></Label>
             </HBox>
 
             <!-- 敌人（黄点） -->
@@ -45,7 +48,10 @@
                 <StackPane prefHeight="20" prefWidth="20">
                     <Label style="-fx-background-color: yellow; -fx-background-radius: 10; -fx-min-width:12; -fx-min-height:12;" />
                 </StackPane>
-                <Label text="敌人（随机遇敌点）" />
+                <Label text="敌人（随机遇敌点）">
+               <font>
+                  <Font size="14.0" />
+               </font></Label>
             </HBox>
 
             <!-- 终点 -->
@@ -53,8 +59,21 @@
                 <StackPane prefHeight="20" prefWidth="20">
                     <Label style="-fx-background-color: green; -fx-background-radius: 3; -fx-min-width:12; -fx-min-height:12;" />
                 </StackPane>
-                <Label text="终点" />
+                <Label text="终点">
+               <font>
+                  <Font size="14.0" />
+               </font></Label>
             </HBox>
+         <HBox prefHeight="89.0" prefWidth="290.0" spacing="8">
+            <children>
+               <StackPane prefHeight="20" prefWidth="20" />
+                    <Label prefHeight="75.0" prefWidth="260.0" maxWidth="260.0" wrapText="true" text="战斗胜利将奖励30金币，抵达终点则额外奖励200金币">
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+               </Label>
+            </children>
+         </HBox>
         </VBox>
     </right>
 </BorderPane>

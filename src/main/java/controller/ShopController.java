@@ -75,7 +75,7 @@ public class ShopController {
 
 	@FXML
 	private void buyEgg(ActionEvent event) {
-		final int unitPrice = 200;
+		final int unitPrice = 100;
 		int count = eggSpinner.getValue();
 		final int price = unitPrice * count;
 		Bag bag = dataManager.getPlayerBag();
@@ -109,7 +109,7 @@ public class ShopController {
 
 	@FXML
 	private void buySoap(ActionEvent event) {
-		final int unitPrice = 50;
+		final int unitPrice = 30;
 		int count = soapSpinner.getValue();
 		final int price = unitPrice * count;
 		Bag bag = dataManager.getPlayerBag();
@@ -141,7 +141,7 @@ public class ShopController {
 
 	@FXML
 	private void buyRice(ActionEvent event) {
-		final int unitPrice = 50;
+		final int unitPrice = 30;
 		int count = riceSpinner.getValue();
 		final int price = unitPrice * count;
 		Bag bag = dataManager.getPlayerBag();

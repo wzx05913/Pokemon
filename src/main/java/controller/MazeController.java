@@ -39,6 +39,8 @@ public class MazeController {
     private GraphicsContext gc;
     private int cellSize;
     private Stage primaryStage; // 由调用者（BedroomSelectController）传入同一个 Stage
+    // 记录探索开始时的金币数，用于到达终点时统计本次探索获得的金币
+    private int coinsAtExplorationStart = 0;
 
     @FXML
     public void initialize() {
@@ -50,6 +52,15 @@ public class MazeController {
         cellSize = Math.max(4, (int) (Math.min(canvas.getWidth(), canvas.getHeight()) / maze.getSize()));
 
         drawMaze();
+
+        // 记录探索开始时的金币数（用于到达终点时计算本次探索获得）
+        try {
+            Integer coins = GameDataManager.getInstance().getPlayerBag() != null ?
+                    GameDataManager.getInstance().getPlayerBag().getCoins() : null;
+            coinsAtExplorationStart = coins != null ? coins : 0;
+        } catch (Exception e) {
+            coinsAtExplorationStart = 0;
+        }
 
         // 键盘事件监听（在 canvas 上）
         canvas.setOnKeyPressed(event -> {
@@ -242,6 +253,26 @@ public class MazeController {
                 }
                 FXMLLoader loader = new FXMLLoader(resource);
                 Parent bedroomRoot = loader.load();
+
+                // 到达终点：先计算本次探索期间获得的金币并发放额外奖励200金币
+                try {
+                    int currentCoins = GameDataManager.getInstance().getPlayerBag() != null ?
+                            (GameDataManager.getInstance().getPlayerBag().getCoins() != null ?
+                                    GameDataManager.getInstance().getPlayerBag().getCoins() : 0) : 0;
+                    int explorationGain = currentCoins - coinsAtExplorationStart;
+                    // 发放额外200金币
+                    GameDataManager.getInstance().addCoins(200);
+                    // 同步到当前 Player.money（如果存在）
+                    if (GameDataManager.getInstance().getCurrentPlayer() != null) {
+                        Integer afterCoins = GameDataManager.getInstance().getPlayerBag() != null ?
+                                GameDataManager.getInstance().getPlayerBag().getCoins() : null;
+                        if (afterCoins != null) GameDataManager.getInstance().getCurrentPlayer().setMoney(afterCoins);
+                    }
+                    showAlert("恭喜探索完成！", "探索获得：" + explorationGain + "个金币，抵达终点额外奖励200金币！");
+                } catch (Exception ex) {
+                    // 忽略错误，继续返回卧室
+                }
+
                 this.primaryStage.setScene(new Scene(bedroomRoot, 800, 600));
                 this.primaryStage.centerOnScreen();
                 this.primaryStage.show();
