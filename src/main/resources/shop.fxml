@@ -92,17 +92,17 @@
          </font>
       </Label>
 
-      <Label layoutX="106.0" layoutY="395.0" text="售价：200金币">
+      <Label layoutX="106.0" layoutY="395.0" text="售价：100金币">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <Label layoutX="341.0" layoutY="395.0" text="售价：50金币">
+      <Label layoutX="341.0" layoutY="395.0" text="售价：30金币">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <Label layoutX="592.0" layoutY="395.0" text="售价：50金币">
+      <Label layoutX="592.0" layoutY="395.0" text="售价：30金币">
          <font>
             <Font size="16.0" />
          </font>

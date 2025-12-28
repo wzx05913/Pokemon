@@ -92,6 +92,7 @@ public class MainController {
         return null;
     }
 
+    // 继续游戏按钮
     @FXML
     private void handleContinueGame() {
         System.out.println("继续游戏按钮被点击");
@@ -363,7 +364,6 @@ public class MainController {
             Stage stage = new Stage();
             stage.setTitle("迷宫探索");
             stage.setScene(new Scene(mazeEntryRoot, 400, 300));
-            centerStage(stage);
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
