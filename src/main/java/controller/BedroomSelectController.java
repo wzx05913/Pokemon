@@ -161,11 +161,17 @@ public class BedroomSelectController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/shop.fxml"));
             Parent shopRoot = loader.load();
 
-            // 在新窗口中打开商店
+            // 在新窗口中打开商店（使用较大尺寸以容纳内容）
             Stage shopStage = new Stage();
             shopStage.setTitle("宝可梦商店");
-            shopStage.setScene(new Scene(shopRoot, 600, 400));
-            shopStage.show();
+            // 使用模态窗口并设置拥有者，避免被其他窗口遮挡
+            shopStage.initModality(Modality.WINDOW_MODAL);
+            shopStage.initOwner(shopButton.getScene().getWindow());
+            Scene scene = new Scene(shopRoot, 800, 600); // 加大为 800x600
+            shopStage.setScene(scene);
+            shopStage.setResizable(false);
+            shopStage.centerOnScreen();
+            shopStage.showAndWait();
 
         } catch (Exception e) {
             e.printStackTrace();
