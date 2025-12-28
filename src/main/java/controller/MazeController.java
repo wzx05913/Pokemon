@@ -1,3 +1,4 @@
+// src/main/java/controller/MazeController.java
 package controller;
 
 import entity.Bag;
