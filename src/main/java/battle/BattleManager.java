@@ -430,6 +430,12 @@ public class BattleManager {
                     pokemon.Pokemon created = service.PetFactory.createPokemon(newPet);
                     if (created != null) {
                         GameDataManager.getInstance().getCurrentPlayer().addPet(created);
+                        // 确保全局的 pokemonList 也包含该实例，便于后续内存同步（如清洁度变化）
+                        try {
+                            GameDataManager.getInstance().addPokemon(created);
+                        } catch (Exception ex) {
+                            System.err.println("将捕获的宠物加入全局 pokemonList 失败: " + ex.getMessage());
+                        }
                     }
                 } catch (Exception ex) {
                     System.err.println("将捕获的宠物加入Player失败: " + ex.getMessage());
