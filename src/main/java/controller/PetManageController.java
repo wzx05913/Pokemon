@@ -352,12 +352,12 @@ public class PetManageController {
         }
 
         playerBag.setEggCount(playerBag.getEggCount() - 1);
-
+        selectedPokemon.setClean(100);
+        loadPetList();
         updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);
         }
-
         showAlert("成功", "使用蛋成功，宠物已复活");
     }
 
