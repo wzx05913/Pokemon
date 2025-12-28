@@ -42,6 +42,7 @@ public class BattleController {
     private List<Button> moveButtons = new ArrayList<>();
     private Parent root;
     private Consumer<Boolean> battleEndCallback;
+    private boolean coinsAwarded = false; // 防止重复发放
 
     public BattleController() {}
     public void initData(List<Pet> petList, Bag bag, Consumer<Boolean> callback) {
@@ -349,7 +350,18 @@ public class BattleController {
         // 显示结果
         if (battleManager.getBattleResult() == BattleResult.PLAYER_WIN) {
             battleResultLabel.setText("你赢了！获得了30金币！");
-            GameDataManager.getInstance().addCoins(30);
+            if (!coinsAwarded) {
+                GameDataManager.getInstance().addCoins(30);
+                // 同步到 currentPlayer 的 money 显示
+                if (GameDataManager.getInstance().getCurrentPlayer() != null) {
+                    Integer coins = GameDataManager.getInstance().getPlayerBag() != null ?
+                            GameDataManager.getInstance().getPlayerBag().getCoins() : null;
+                    if (coins != null) {
+                        GameDataManager.getInstance().getCurrentPlayer().setMoney(coins);
+                    }
+                }
+                coinsAwarded = true;
+            }
             boolean caught = battleManager.tryCatchEnemy();
             if (caught) {
                 battleResultLabel.setText(battleResultLabel.getText() + "\n成功捕获了敌人的宝可梦！");

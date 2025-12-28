@@ -441,13 +441,22 @@ public class SaveLoadController {
             currentPlayer.setId(playerId);
         }
 
-        // 保存背包数据
+        // 保存背包数据：优先使用 GameDataManager 中的内存背包
         Bag bag = new Bag();
         bag.setUserId(playerId);
-        bag.setEggCount(0);
-        bag.setRiceCount(0);
-        bag.setSoapCount(0);
-        bag.setCoins(currentPlayer.getMoney());
+        Bag currentBag = dataManager.getPlayerBag();
+        if (currentBag != null) {
+            bag.setEggCount(currentBag.getEggCount());
+            bag.setRiceCount(currentBag.getRiceCount());
+            bag.setSoapCount(currentBag.getSoapCount());
+            bag.setCoins(currentBag.getCoins() != null ? currentBag.getCoins() : currentPlayer.getMoney());
+        } else {
+            // 回退：如果内存没有背包，则使用当前玩家的金币并将物品数设为0
+            bag.setEggCount(0);
+            bag.setRiceCount(0);
+            bag.setSoapCount(0);
+            bag.setCoins(currentPlayer != null ? currentPlayer.getMoney() : 0);
+        }
 
         Bag existingBag = bagDAO.getBagByUserId(playerId);
         if (existingBag != null) {

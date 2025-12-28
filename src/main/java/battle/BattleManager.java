@@ -389,12 +389,8 @@ public class BattleManager {
 
         if (!enemyHasAlive) {
             battleResult = BattleResult.PLAYER_WIN;
-            GameDataManager g = GameDataManager.getInstance();
-            // 增加金币（更新Bag并同步到当前Player）
-            g.addCoins(30);
-            if (g.getCurrentPlayer() != null) {
-                g.getCurrentPlayer().setMoney(g.getPlayerBag().getCoins());
-            }
+            // 胜利状态由调用方（例如 BattleController.endBattle）负责结算与奖励，
+            // 以避免在多处调用 isBattleEnded() 时重复发放金币。
             return true;
         }
 
