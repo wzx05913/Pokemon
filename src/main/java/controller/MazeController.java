@@ -166,7 +166,8 @@ public class MazeController {
                     gc.setFill(Color.YELLOW);
                     double cx = x + cellSize / 2.0;
                     double cy = y + cellSize / 2.0;
-                    double r = Math.max(3, cellSize * 0.2);
+                    // 放大遇敌黄色点的直径
+                    double r = Math.max(6, cellSize * 0.5);
                     gc.fillOval(cx - r/2, cy - r/2, r, r);
                 }
             }
@@ -178,18 +179,22 @@ public class MazeController {
         if (px >= 0 && py >= 0 && px < size && py < size) {
             double pxX = py * cellSize + cellSize / 2.0;
             double pxY = px * cellSize + cellSize / 2.0;
-            double pr = Math.max(5, cellSize * 0.35);
+            // 放大玩家红点的直径
+            double pr = Math.max(8, cellSize * 0.6);
             gc.setFill(Color.RED);
             gc.fillOval(pxX - pr/2, pxY - pr/2, pr, pr);
         }
 
-        // 可选：绘制网格线（美观）
+        // 注：以下原来用于绘制网格灰色边的代码会在黑色障碍（墙）上出现灰边。
+        // 按需求将其注释掉以移除黑色方形的灰色边缘（保留代码以便恢复）。
+        /*
         gc.setStroke(Color.gray(0.8));
         gc.setLineWidth(0.5);
         for (int i = 0; i <= size; i++) {
             gc.strokeLine(0, i * cellSize, size * cellSize, i * cellSize);
             gc.strokeLine(i * cellSize, 0, i * cellSize, size * cellSize);
         }
+        */
     }
 
     // 打开战斗窗口（保持原有逻辑：加载 Battle 界面并传入玩家宠物）
