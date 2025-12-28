@@ -27,6 +27,9 @@ public abstract class Pokemon {
     protected boolean asleep = false;
     protected int asleepTurns = 0;
 
+    // 最近一次伤害是否暴击
+    private boolean lastCritical = false;
+
     // 技能列表
     protected List<Move> moves = new ArrayList<>();
 
@@ -47,8 +50,16 @@ public abstract class Pokemon {
         int raw = (int)Math.round(this.attack * 0.8);
         int reduction = target.getDefense() / 4; // 防御只削弱一部分
         int damage = Math.max(1, raw - reduction);
+
+        // 暴击：20%概率，1.5倍伤害
+        boolean crit = rollCritical();
+        if (crit) {
+            damage = (int)Math.round(damage * 1.5);
+        }
+        this.lastCritical = crit;
+
         target.takeDamage(damage);
-        System.out.println(this.name + " 进行了普通攻击，造成 " + damage + " 点伤害");
+        System.out.println(this.name + " 进行了普通攻击，造成 " + damage + " 点伤害" + (crit ? "（暴击！）" : ""));
         return damage;
     }
     // 抽象方法 - 子类必须实现
@@ -161,6 +172,7 @@ public abstract class Pokemon {
                     target.reduceAttack(5);
                     System.out.println(name + " 使用了 叫声，降低了 " + target.getName() + " 的攻击！");
                 }
+                this.lastCritical = false;
                 return 0;
             } else if ("唱歌".equals(moveName) || "唱".equals(moveName)) {
                 // 使对方沉睡一回合
@@ -168,22 +180,33 @@ public abstract class Pokemon {
                     target.setAsleep(1);
                     System.out.println(name + " 唱起了催眠曲，" + target.getName() + " 进入了睡眠！");
                 }
+                this.lastCritical = false;
                 return 0;
             } else if ("生长".equals(moveName)) {
                 // 提高自身攻击
                 this.increaseAttack(5);
                 System.out.println(name + " 使用了 生长，提升了自身攻击！");
+                this.lastCritical = false;
                 return 0;
             } else if ("缩入壳中".equals(moveName)) {
                 // 提高自身防御
                 this.increaseDefense(5);
                 System.out.println(name + " 使用了 缩入壳中，提升了自身防御！");
+                this.lastCritical = false;
                 return 0;
             } else {
                 // 普通伤害技能
                 int damage = move.calculateDamage(this.attack, target.defense);
+
+                // 暴击判定
+                boolean crit = rollCritical();
+                if (crit) {
+                    damage = (int)Math.round(damage * 1.5);
+                }
+                this.lastCritical = crit;
+
                 target.takeDamage(damage);
-                System.out.println(name + " 使用了 " + move.getName() + "，造成了 " + damage + " 点伤害！");
+                System.out.println(name + " 使用了 " + move.getName() + "，造成了 " + damage + " 点伤害" + (crit ? "（暴击！）" : "") + "！");
                 return Math.max(0, damage);
             }
         }
@@ -241,6 +264,16 @@ public abstract class Pokemon {
         this.defense = Math.max(1, this.defense + amount);
     }
 
+    // 最近一次是否暴击（供 BattleManager 读取）
+    public boolean wasLastCritical() {
+        return lastCritical;
+    }
+
+    // 暴击概率（可按需调整）
+    protected boolean rollCritical() {
+        return Math.random() < 0.10; // 20% 概率
+    }
+
     // 获取信息
     public String getInfo() {
         return String.format("%s Lv.%d HP: %d/%d", name, level, hp, maxHp);
@@ -280,7 +313,6 @@ public abstract class Pokemon {
     public int getExp() { return exp; }
     public int getExpToNextLevel() { return expToNextLevel; }
     public List<Move> getMoves() { return moves; }
-
 
     public void setExp(int exp) { this.exp = Math.min(this.maxHp, exp); }
     public String getType(){return name;}

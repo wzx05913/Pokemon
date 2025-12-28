@@ -14,7 +14,7 @@
     <!-- 顶部：退出按钮 -->
     <top>
         <HBox spacing="8" style="-fx-padding:8;">
-            <Button onAction="#onExitExploration" text="退出探索" />
+            <Button onAction="#onExitExploration" text="退出探索" focusTraversable="false"/>
         </HBox>
     </top>
 
