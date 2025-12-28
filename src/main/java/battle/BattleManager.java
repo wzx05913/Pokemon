@@ -129,7 +129,6 @@ public class BattleManager {
         }
     }
 
-    // 玩家使用技能
     public BattleStepResult playerUseMove(int moveIndex) {
         if (!isPlayerTurn || currentPlayerPokemon == null) {
             return new BattleStepResult(false, "不是你的回合");
@@ -179,12 +178,19 @@ public class BattleManager {
                 message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，降低了敌方的攻击！";
             } else if ("唱歌".equals(move.getName()) || "唱".equals(move.getName())) {
                 message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，敌方陷入了一回合睡眠！";
+            } else if ("生长".equals(move.getName())) {
+                message = currentPlayerPokemon.getName() + " 使用了 生长，提升了自身攻击！";
+            } else if ("缩入壳中".equals(move.getName())) {
+                message = currentPlayerPokemon.getName() + " 使用了 缩入壳中，提升了自身防御！";
             } else {
                 message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，技能效果生效！";
             }
         } else {
             // result 为造成的伤害数值，战斗日志显示具体数字
             message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，造成了 " + result + " 点伤害。";
+            if (currentPlayerPokemon.wasLastCritical()) {
+                message += "（暴击！）";
+            }
         }
 
         // 检查敌人是否被击败（只有 HP <= 0 才出队）
@@ -270,12 +276,19 @@ public class BattleManager {
                 message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 " + bestMove.getName() + "，降低了你的攻击！";
             } else if ("唱歌".equals(bestMove.getName()) || "唱".equals(bestMove.getName())) {
                 message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 " + bestMove.getName() + "，你进入睡眠！";
+            } else if ("生长".equals(bestMove.getName())) {
+                message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 生长，提升了自身攻击！";
+            } else if ("缩入壳中".equals(bestMove.getName())) {
+                message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 缩入壳中，提升了自身防御！";
             } else {
                 message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 " + bestMove.getName() + "（效果生效）";
             }
         } else {
             // 包含具体伤害数字
             message = "敌人的" + currentEnemyPokemon.getName() + " 使用了 " + bestMove.getName() + "，造成了 " + result + " 点伤害。";
+            if (currentEnemyPokemon.wasLastCritical()) {
+                message += "（暴击！）";
+            }
         }
 
         // 检查玩家宠物是否被击败（只有 HP <= 0 才出队）
@@ -294,10 +307,10 @@ public class BattleManager {
             enemyQueue.poll();
             currentEnemyPokemon = (enemyQueue == null ? null : enemyQueue.peek());
         } else {
-            // 不轮转敌人（如果你希望敌人也按回合轮换，可以在此处改为轮转）
+            // 不轮转敌人
         }
 
-        // 在敌人行动后，让玩家回复少量 PP（使玩家下一回合不会被 PP 卡住）
+        // 在敌人行动后，让玩家回复少量 PP
         if (currentPlayerPokemon != null) {
             currentPlayerPokemon.recoverPpEachTurn(10);
         }

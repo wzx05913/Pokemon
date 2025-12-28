@@ -1,16 +1,10 @@
 package database;
 
 import entity.User;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 用户表数据访问对象
- */
 public class UserDAO {
     /**
      * 创建新用户（对应users表插入）
@@ -52,6 +46,7 @@ public class UserDAO {
         }
         return null;
     }
+
     public List<User> getAllUsers() throws SQLException {
         List<User> users = new ArrayList<>();
         String sql = "SELECT UserID FROM users ORDER BY UserID";
@@ -78,6 +73,33 @@ public class UserDAO {
 
             stmt.setInt(1, userId);
             stmt.executeUpdate();
+        }
+    }
+
+    /**
+     * 确保指定ID的用户存在：
+     * - 如果存在则什么也不做
+     * - 如果不存在则插入一条记录，UserID 使用指定的值（不生成新编号）
+     */
+    public void ensureUserExistsWithId(int userId) throws SQLException {
+        if (userId <= 0) {
+            throw new IllegalArgumentException("ensureUserExistsWithId: 非法的 userId=" + userId);
+        }
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            // 检查是否存在
+            try (PreparedStatement check = conn.prepareStatement("SELECT 1 FROM users WHERE UserID = ?")) {
+                check.setInt(1, userId);
+                try (ResultSet rs = check.executeQuery()) {
+                    if (rs.next()) {
+                        return; // 已存在
+                    }
+                }
+            }
+            // 插入指定ID（注意：要求数据库允许显式插入主键，常见的自增主键也允许插入指定值）
+            try (PreparedStatement insert = conn.prepareStatement("INSERT INTO users (UserID) VALUES (?)")) {
+                insert.setInt(1, userId);
+                insert.executeUpdate();
+            }
         }
     }
 }

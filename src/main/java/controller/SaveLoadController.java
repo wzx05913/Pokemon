@@ -414,25 +414,26 @@ public class SaveLoadController {
 
     private void saveCurrentPlayer(SaveData saveData) throws SQLException {
         // 检查当前玩家是否是临时玩家
-        boolean isTemporaryPlayer = currentPlayer.getId() == -1;
+        boolean isTemporaryPlayer = (currentPlayer == null || currentPlayer.getId() == -1);
 
         User dbUser;
         if (isTemporaryPlayer) {
-            // 临时玩家：创建新的数据库用户
+            // 游客：创建新用户（产生新编号）
             dbUser = userDAO.createUser();
             System.out.println("为临时玩家创建数据库用户，ID: " + dbUser.getUserId());
+            // 将新编号赋给当前玩家
+            currentPlayer.setId(dbUser.getUserId());
         } else {
-            // 已有数据库用户：尝试获取
-            dbUser = userDAO.getUserById(currentPlayer.getId());
+            // 非游客：必须沿用当前编号，不得创建新的ID
+            int expectedId = currentPlayer.getId();
+            dbUser = userDAO.getUserById(expectedId);
             if (dbUser == null) {
-                // 回退策略：如果找不到对应数据库用户，创建一个新用户以避免保存失败
-                System.err.println("警告: 期望的数据库用户 (ID=" + currentPlayer.getId() + ") 不存在，创建新的用户作为回退。");
-                dbUser = userDAO.createUser();
-                isTemporaryPlayer = true;
-                System.out.println("已为会话创建新的数据库用户，ID: " + dbUser.getUserId());
+                // 不创建新编号；确保用当前编号插入一条用户记录
+                userDAO.ensureUserExistsWithId(expectedId);
+                dbUser = new User(expectedId);
+                System.out.println("为现有玩家ID补建数据库记录，ID: " + expectedId);
             }
         }
-
         int playerId = dbUser.getUserId();
 
         // 如果玩家是临时的，更新其ID
