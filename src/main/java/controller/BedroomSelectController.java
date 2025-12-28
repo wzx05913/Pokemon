@@ -48,12 +48,38 @@ public class BedroomSelectController {
         // 可以在这里添加一些初始化代码
     }
 
-    // 宠物按钮点击事件
     @FXML
     private void onPetButtonClick() {
         System.out.println("宠物按钮被点击");
-        // TODO: 跳转到宠物管理界面
-        showAlert("功能开发中", "宠物管理功能正在开发中...");
+        try {
+            java.net.URL resource = getClass().getResource("/petmanage.fxml");
+            if (resource == null) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("错误");
+                a.setHeaderText(null);
+                a.setContentText("找不到宠物管理页面资源(petmanage.fxml)。");
+                a.showAndWait();
+                return;
+            }
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(resource);
+            javafx.scene.Parent root = loader.load();
+
+            javafx.stage.Stage dialog = new javafx.stage.Stage();
+            dialog.initOwner(petButton.getScene().getWindow());
+            dialog.initModality(javafx.stage.Modality.WINDOW_MODAL); // 如需非模态，注释掉这行
+            dialog.setTitle("宠物管理");
+            dialog.setScene(new javafx.scene.Scene(root, 685, 444)); // 用你的 FXML尺寸
+            dialog.setResizable(false);
+            dialog.centerOnScreen();
+            dialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("错误");
+            a.setHeaderText(null);
+            a.setContentText("无法打开宠物管理界面：" + e.getMessage());
+            a.showAndWait();
+        }
     }
 
     // 休息（存档）按钮点击事件
