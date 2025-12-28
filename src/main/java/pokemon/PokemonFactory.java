@@ -7,7 +7,7 @@ public class PokemonFactory {
         String typeStr = petEntity.getType();
         PokemonType type = PokemonType.valueOf(petEntity.getType());
         Pokemon pokemon;
-        
+
         switch (type) {
             case 妙蛙种子:
                 pokemon = new Bulbasaur(petEntity.getLevel());
@@ -30,7 +30,7 @@ public class PokemonFactory {
             default:
                 throw new IllegalArgumentException("不支持的宠物类型");
         }
-        
+
         // 同步清洁度和存活状态
         if (petEntity.getClean() != null) {
             pokemon.setClean(petEntity.getClean());
@@ -40,8 +40,24 @@ public class PokemonFactory {
         if (petEntity.getAlive() != null) {
             pokemon.setAlive(petEntity.getAlive());
         }
-        // 修复HP设置错误（保持兼容旧逻辑）
-        pokemon.setHp(petEntity.getLevel());
+
+        // 修正：设置当前 HP 为最大 HP（而不是把 level 当 HP 写入）
+        pokemon.setHp(pokemon.getMaxHp());
+
+        // 关键：把数据库里的经验同步到 Pokemon（避免加载后 exp 为 0）
+        // petEntity.getExperience() 可能为 null（若使用 Integer），谨慎处理
+        try {
+            Integer dbExp = petEntity.getExperience();
+            if (dbExp != null) {
+                pokemon.setExp(dbExp);
+            } else {
+                pokemon.setExp(0);
+            }
+        } catch (Exception e) {
+            // 容错：若类型不对或其它异常，保留默认经验 0
+            pokemon.setExp(0);
+        }
+
         return pokemon;
     }
 

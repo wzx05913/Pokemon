@@ -326,7 +326,9 @@ public abstract class Pokemon {
     public int getExpToNextLevel() { return expToNextLevel; }
     public List<Move> getMoves() { return moves; }
 
-    public void setExp(int exp) { this.exp = Math.min(this.maxHp, exp); }
+    public void setExp(int exp) {
+        this.exp = Math.max(0, exp);
+    }
     public String getType(){return name;}
     public void setType(String name) { this.name = name; }
 

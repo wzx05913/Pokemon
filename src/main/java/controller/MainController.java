@@ -1,18 +1,14 @@
 // MainController.java
 package controller;
+import javafx.application.Platform;
 import javafx.scene.input.MouseEvent;
 import Player.Player;
 
-import service.PetFactory;
-import database.UserDAO;
-import database.PetDAO;
-import entity.User;
 import entity.Pet;
 import entity.Bag;
 import pokemon.Pokemon;
 import service.GameDataManager;
 import pokemon.PokemonFactory;
-import database.BagDAO;
 
 import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
@@ -239,9 +235,7 @@ public class MainController {
             gameDataManager.setCurrentPokemon(pokemon);
             gameDataManager.addPokemon(pokemon);
             gameDataManager.setCurrentUserId(userId);
-
-            BagDAO bagDAO = new BagDAO();
-            Bag userBag = bagDAO.getBagByUserId(userId);
+            Bag userBag = new Bag();
             if (userBag == null) {
                 userBag = new Bag(userId);
             }
@@ -259,6 +253,7 @@ public class MainController {
             e.printStackTrace();
             showAlert("错误", "创建宠物失败: " + e.getMessage());
         }
+
     }
 
     private void showSuccessAlert(String petName) {
@@ -266,8 +261,32 @@ public class MainController {
         alert.setTitle("宠物创建成功");
         alert.setHeaderText(null);
         alert.setContentText("恭喜！你选择了" + petName + "！\n游戏即将开始...");
+
+        // 把 owner 设置为主窗口，避免焦点/模态问题
+        if (container != null && container.getScene() != null) {
+            alert.initOwner(container.getScene().getWindow());
+        }
+
+        System.out.println("[DEBUG] 将显示成功提示框");
         alert.setOnHidden(event -> {
-            switchToPageWithFade("main1");
+            System.out.println("[DEBUG] 提示框已关闭，准备切换页面 -> main1");
+            Platform.runLater(() -> {
+                System.out.println("[DEBUG] pages keys: " + pages.keySet());
+                System.out.println("[DEBUG] pages.containsKey(\"main1\"): " + pages.containsKey("main1"));
+                System.out.println("[DEBUG] container == null? " + (container == null));
+                if (container != null) {
+                    System.out.println("[DEBUG] container children count: " + container.getChildren().size());
+                    if (!container.getChildren().isEmpty()) {
+                        Node curr = container.getChildren().get(0);
+                        System.out.println("[DEBUG] current child class: " + curr.getClass().getName());
+                        System.out.println("[DEBUG] current child equals pages.get(\"select\")? " + (curr == pages.get("select")));
+                        System.out.println("[DEBUG] current child equals pages.get(\"main1\")? " + (curr == pages.get("main1")));
+                    }
+                }
+                // 先尝试直接切换（无动画）
+                switchToPage("main1");
+                // 如果你仍想用淡入淡出，改为 switchToPageWithFade("main1");
+            });
         });
 
         alert.show();

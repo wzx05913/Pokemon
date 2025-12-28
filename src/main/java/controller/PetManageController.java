@@ -25,47 +25,32 @@ import service.PetFactory;
  */
 public class PetManageController {
     @FXML
-    private ScrollPane petListScrollPane; // 左侧宠物列表滚动面板
-
+    private ScrollPane petListScrollPane;
     @FXML
-    private ImageView petImageView; // 右侧宠物图片
-
+    private ImageView petImageView;
     @FXML
-    private Label nameLabel; // 名字标签
-
+    private Label nameLabel;
     @FXML
-    private Label idLabel; // id标签
-
+    private Label idLabel;
     @FXML
-    private Label cleanLabel; // 清洁度标签
-
+    private Label cleanLabel;
     @FXML
-    private Label levelLabel; // 等级标签
-
-    // 添加经验标签
+    private Label levelLabel;
     @FXML
     private Label expLabel;
-
-    // 添加道具按钮
     @FXML
     private Button useEggButton;
-
     @FXML
     private Button useSoapButton;
-
     @FXML
     private Button useRiceButton;
-
     // 道具数量标签
     @FXML
     private Label eggCountLabel;
-
     @FXML
     private Label soapCountLabel;
-
     @FXML
     private Label riceCountLabel;
-
     private GameDataManager gameDataManager;
     private List<Pet> petList;
     private Bag playerBag;
@@ -76,20 +61,14 @@ public class PetManageController {
     private void initialize() {
         System.out.println("PetManageController 初始化");
 
-        // 获取 GameDataManager 实例
         gameDataManager = GameDataManager.getInstance();
 
-        // 打印调试信息
         System.out.println("当前玩家: " + gameDataManager.getCurrentPlayer());
         System.out.println("宠物列表: " + gameDataManager.getPetList());
 
-        // 初始化UI
         initUI();
 
-        // 加载宠物列表
         loadPetList();
-
-        // 更新道具数量显示
         updateItemCounts();
     }
 
@@ -215,56 +194,6 @@ public class PetManageController {
     private void selectPet(Pet pet) {
         selectedPet = pet;
         selectedPokemon = null;
-
-        System.out.println("显示宠物信息: " + pet.getName());
-
-        // 显示宠物名字
-        nameLabel.setText(pet.getName() != null ? pet.getName() : "未知");
-
-        // 显示宠物ID
-        idLabel.setText(String.valueOf(pet.getPetId()));
-
-        // 显示清洁度
-        int clean = pet.getClean() != null ? pet.getClean() : 0;
-        cleanLabel.setText(clean + "/100");
-
-        // 显示等级
-        levelLabel.setText(String.valueOf(pet.getLevel()));
-
-        // 显示经验
-        if (expLabel != null) {
-            int exp = pet.getExperience() != null ? pet.getExperience() : 0;
-            expLabel.setText(exp + "/100"); // 这里应该是升级所需经验
-        }
-
-        // 显示宠物图片
-        try {
-            String imagePath = "/images/" + pet.getType() + ".png";
-            Image petImage = new Image(getClass().getResourceAsStream(imagePath));
-            petImageView.setImage(petImage);
-        } catch (Exception e) {
-            System.out.println("无法加载图片: " + pet.getType() + ".png");
-
-            // 尝试加载默认图片
-            try {
-                Image defaultImage = new Image(getClass().getResourceAsStream("/images/default_pet.png"));
-                petImageView.setImage(defaultImage);
-            } catch (Exception ex) {
-                System.err.println("也无法加载默认图片: " + ex.getMessage());
-                petImageView.setImage(null);
-            }
-        }
-
-        // 在GameDataManager的pokemonList中找到对应的Pokemon
-        for (Pokemon p : gameDataManager.getPokemonList()) {
-            if (p.getName().equals(pet.getType())) {
-                selectedPokemon = p;
-                System.out.println("找到对应的Pokemon: " + p.getName());
-                break;
-            }
-        }
-
-        // 如果没有找到，尝试通过PetFactory创建
         if (selectedPokemon == null) {
             try {
                 selectedPokemon = PetFactory.createPokemon(pet);
@@ -275,11 +204,50 @@ public class PetManageController {
                 System.err.println("创建Pokemon失败: " + e.getMessage());
             }
         }
+
+        System.out.println("显示宠物信息: " + pet.getName());
+
+        nameLabel.setText(pet.getName() != null ? pet.getName() : "未知");
+
+        idLabel.setText(String.valueOf(pet.getPetId()));
+
+        int clean = pet.getClean() != null ? pet.getClean() : 0;
+        cleanLabel.setText(clean + "/100");
+
+        levelLabel.setText(String.valueOf(pet.getLevel()));
+
+        if (expLabel != null) {
+            int exp = pet.getExperience() != null ? pet.getExperience() : 0;
+            expLabel.setText(exp+"/"+selectedPokemon.getExpToNextLevel()); // 这里应该是升级所需经验
+        }
+
+        try {
+            String imagePath = "/images/" + pet.getType() + ".png";
+            Image petImage = new Image(getClass().getResourceAsStream(imagePath));
+            petImageView.setImage(petImage);
+        } catch (Exception e) {
+            System.out.println("无法加载图片: " + pet.getType() + ".png");
+
+            try {
+                Image defaultImage = new Image(getClass().getResourceAsStream("/images/default_pet.png"));
+                petImageView.setImage(defaultImage);
+            } catch (Exception ex) {
+                System.err.println("也无法加载默认图片: " + ex.getMessage());
+                petImageView.setImage(null);
+            }
+        }
+
+        for (Pokemon p : gameDataManager.getPokemonList()) {
+            if (p.getName().equals(pet.getType())) {
+                selectedPokemon = p;
+                System.out.println("找到对应的Pokemon: " + p.getName());
+                break;
+            }
+        }
+
+
     }
 
-    /**
-     * 更新道具数量显示
-     */
     private void updateItemCounts() {
         playerBag = gameDataManager.getPlayerBag();
 
@@ -288,7 +256,6 @@ public class PetManageController {
             return;
         }
 
-        // 更新道具数量标签
         if (eggCountLabel != null) {
             eggCountLabel.setText("x" + (playerBag.getEggCount() != null ? playerBag.getEggCount() : 0));
         }
@@ -302,7 +269,6 @@ public class PetManageController {
         }
     }
 
-    // 道具使用按钮的事件方法
     @FXML
     private void onUseEggClick() {
         if (selectedPet == null) {
@@ -356,7 +322,7 @@ public class PetManageController {
         }
 
         if (playerBag.getRiceCount() == null || playerBag.getRiceCount() <= 0) {
-            showAlert("提示", "米饭的数量不足");
+            showAlert("提示", "苹果的数量不足");
             return;
         }
 
@@ -385,10 +351,8 @@ public class PetManageController {
             selectedPokemon.setAlive(true);
         }
 
-        // 减少背包中的蛋数量
         playerBag.setEggCount(playerBag.getEggCount() - 1);
 
-        // 更新数据库
         try {
             database.PetDAO petDAO = new database.PetDAO();
             petDAO.updatePet(selectedPet);
@@ -402,6 +366,7 @@ public class PetManageController {
 
         // 刷新界面
         loadPetList();
+        updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);
         }
@@ -452,6 +417,7 @@ public class PetManageController {
 
         // 刷新界面
         loadPetList();
+        updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);
         }
@@ -459,16 +425,14 @@ public class PetManageController {
         showAlert("成功", "使用肥皂成功，清洁度增加30");
     }
 
-    /**
-     * 使用米饭：增加100经验
-     */
+
     private void useRice() {
         if (selectedPet == null) {
             showAlert("提示", "请先选择一个宠物");
             return;
         }
         if (playerBag.getRiceCount() == null || playerBag.getRiceCount() <= 0) {
-            showAlert("提示", "米饭的数量不足");
+            showAlert("提示", "苹果的数量不足");
             return;
         }
 
@@ -489,10 +453,8 @@ public class PetManageController {
             }
         }
 
-        // 减少背包中的米饭数量
         playerBag.setRiceCount(playerBag.getRiceCount() - 1);
 
-        // 更新数据库
         try {
             database.PetDAO petDAO = new database.PetDAO();
             petDAO.updatePet(selectedPet);
@@ -506,16 +468,14 @@ public class PetManageController {
 
         // 刷新界面
         loadPetList();
+        updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);
         }
 
-        showAlert("成功", "使用米饭成功，经验增加100");
+        showAlert("成功", "使用苹果成功，经验增加100");
     }
 
-    /**
-     * 显示提示框
-     */
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
