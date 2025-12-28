@@ -486,9 +486,10 @@ public class SaveLoadController {
 
                 pet.setLevel(pokemon.getLevel());
                 pet.setAttack(pokemon.getAttack());
-                pet.setClean(100);
+                // 使用当前内存中 Pokemon 的清洁度和存活状态进行保存
+                pet.setClean(pokemon.getClean());
                 pet.setExperience(pokemon.getExp());
-                pet.setAlive(true);
+                pet.setAlive(pokemon.isAlive());
 
                 System.out.println("保存宠物: 名称=" + pokemonName +
                         ", 等级=" + pokemon.getLevel() +
@@ -559,12 +560,7 @@ public class SaveLoadController {
                         petType = "Bulbasaur";
                     }
 
-                    pokemon.Pokemon pokemon = PetFactory.createPokemonFromDB(
-                            petType,
-                            pet.getLevel(),
-                            pet.getAttack(),
-                            pet.getExperience()
-                    );
+                        pokemon.Pokemon pokemon = PetFactory.createPokemon(pet);
                     if (pokemon != null) {
                         loadedPlayer.addPet(pokemon);
                         createdPokemons.add(pokemon);

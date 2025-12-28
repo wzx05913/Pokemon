@@ -26,6 +26,10 @@ public abstract class Pokemon {
     // 状态：睡眠
     protected boolean asleep = false;
     protected int asleepTurns = 0;
+    
+    // 清洁度与存活状态
+    protected int clean = 100; // 默认为100
+    protected boolean alive = true;
 
     // 技能列表
     protected List<Move> moves = new ArrayList<>();
@@ -221,6 +225,14 @@ public abstract class Pokemon {
     public String getInfo() {
         return String.format("%s Lv.%d HP: %d/%d", name, level, hp, maxHp);
     }
+
+    // Clean 相关
+    public int getClean() { return clean; }
+    public void setClean(int clean) { this.clean = Math.max(0, Math.min(100, clean)); }
+
+    // 存活状态
+    public boolean isAlive() { return alive; }
+    public void setAlive(boolean alive) { this.alive = alive; if (!alive) this.hp = 0; }
 
     // 技能信息
     public String getMovesInfo() {

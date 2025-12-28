@@ -46,6 +46,9 @@ public class PetFactory {
             // 保持HP设置逻辑（如有需要可调整）
             pokemon.setHp(petEntity.getLevel() * 1000);
             pokemon.setExp(petEntity.getExperience());
+            // 同步清洁度与存活信息
+            if (petEntity.getClean() != null) pokemon.setClean(petEntity.getClean());
+            pokemon.setAlive(petEntity.getAlive() != null ? petEntity.getAlive() : true);
         }
         return pokemon;
     }
@@ -74,8 +77,12 @@ public class PetFactory {
         if (pet == null) return null;
         Pokemon pokemon = createPokemon(pet.getType(), pet.getLevel());
         if (pokemon == null) return null;
-        pokemon.setHp((int)(pet.getClean() * 0.01 * pokemon.getMaxHp()));  // 清洁度影响生命值
+        if (pet.getClean() != null) {
+            pokemon.setClean(pet.getClean());
+            pokemon.setHp((int)(pet.getClean() * 0.01 * pokemon.getMaxHp()));  // 清洁度影响生命值
+        }
         pokemon.setExp(pet.getExperience());
+        pokemon.setAlive(pet.getAlive() != null ? pet.getAlive() : true);
         return pokemon;
     }
 

@@ -130,6 +130,27 @@ public class GameDataManager {
         pokemonList.clear();  // 清空宝可梦列表
         isTemporary = false;
     }
+
+    // 减少所有宠物的清洁度（只修改内存全局变量），并同步到 Pokemon 对象
+    public void decreaseAllPetsClean(int amount) {
+        if (petList == null) return;
+        for (int i = 0; i < petList.size(); i++) {
+            Pet pet = petList.get(i);
+            if (pet.getClean() == null) pet.setClean(100);
+            int newClean = pet.getClean() - amount;
+            pet.setClean(Math.max(0, newClean));
+            if (pet.getClean() <= 0) {
+                pet.setAlive(false);
+            }
+            // 同步到对应的 Pokemon 实例（如果存在）
+            if (i < pokemonList.size()) {
+                Pokemon p = pokemonList.get(i);
+                p.setClean(pet.getClean());
+                p.setAlive(pet.getAlive() != null ? pet.getAlive() : true);
+                if (!p.isAlive()) p.setHp(0);
+            }
+        }
+    }
     
     public void setCurrentUserId(int userId) {
         this.currentUserId = userId;

@@ -38,9 +38,12 @@ public class BattleManager {
         // 复制宠物列表并按等级降序排列
         playerQueue = new LinkedList<>();
         List<Pokemon> playerPokemons = petList.stream()
-                .map(PokemonFactory::createPokemon)
-                .sorted((p1, p2) -> Integer.compare(p2.getLevel(), p1.getLevel()))
-                .collect(Collectors.toList());
+            // 只使用数据库/实体中标记为存活的宠物
+            .filter(pet -> java.lang.Boolean.TRUE.equals(pet.getAlive()))
+            .map(PokemonFactory::createPokemon)
+            .filter(p -> p != null && p.isAlive())
+            .sorted((p1, p2) -> Integer.compare(p2.getLevel(), p1.getLevel()))
+            .collect(Collectors.toList());
 
         playerQueue.addAll(playerPokemons);
 

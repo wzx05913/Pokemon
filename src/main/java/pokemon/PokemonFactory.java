@@ -31,8 +31,17 @@ public class PokemonFactory {
                 throw new IllegalArgumentException("不支持的宠物类型");
         }
         
-        // 修复HP设置错误（应该同步生命值而不是经验值）
-        pokemon.setHp(petEntity.getLevel()*1000);
+        // 同步清洁度和存活状态
+        if (petEntity.getClean() != null) {
+            pokemon.setClean(petEntity.getClean());
+        } else {
+            pokemon.setClean(100);
+        }
+        if (petEntity.getAlive() != null) {
+            pokemon.setAlive(petEntity.getAlive());
+        }
+        // 修复HP设置错误（保持兼容旧逻辑）
+        pokemon.setHp(petEntity.getLevel());
         return pokemon;
     }
 
@@ -49,7 +58,8 @@ public class PokemonFactory {
         pet.setLevel(pokemon.getLevel());
         pet.setAttack(pokemon.getAttack());
         pet.setExperience(pokemon.getExp());
-        pet.setAlive(!pokemon.isFainted());
+        pet.setAlive(pokemon.isAlive());
+        pet.setClean(pokemon.getClean());
         return pet;
     }
 }

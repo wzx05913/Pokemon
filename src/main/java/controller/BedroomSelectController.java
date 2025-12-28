@@ -119,7 +119,25 @@ public class BedroomSelectController {
     private void onOutButtonClick(ActionEvent event) {
         System.out.println("外出按钮被点击");
         try {
-        	// 从事件对象中获取目标组件
+            // 每次外出减少所有宠物的清洁度（在内存中修改全局变量）
+            service.GameDataManager.getInstance().decreaseAllPetsClean(20);
+
+            // 检查是否还有可出战的宠物（排除 isAlive=false）
+            service.GameDataManager gdm = service.GameDataManager.getInstance();
+            Player current = gdm.getCurrentPlayer();
+            boolean hasAlive = false;
+            if (current != null) {
+                for (pokemon.Pokemon p : current.getPets()) {
+                    if (p != null && p.isAlive()) { hasAlive = true; break; }
+                }
+            }
+            if (!hasAlive) {
+                // 若全部死亡，弹窗提示并阻止进入迷宫
+                showAlert("无法外出", "您已没有可以出战的宠物，无法外出探索！");
+                return;
+            }
+
+            // 从事件对象中获取目标组件
             Stage currentStage = (Stage) ((javafx.scene.Node) event.getTarget()).getScene().getWindow();
         	// 加载迷宫界面
         	FXMLLoader loader = new FXMLLoader(getClass().getResource("/maze.fxml"));
