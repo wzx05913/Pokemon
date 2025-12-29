@@ -1,6 +1,8 @@
 // battle/BattleManager.java
 package battle;
 import java.util.ArrayList;
+
+import controller.SettingsController;
 import pokemon.Pokemon;
 import pokemon.PokemonFactory;
 import pokemon.PokemonType;
@@ -35,6 +37,7 @@ public class BattleManager {
 
     // 初始化战斗
     public void initBattle(List<Pet> petList) {
+        if (Music.BgMusicManager.isMusicEnabled()) Music.BgMusicManager.getInstance().playSceneMusic("battle");
         // 复制宠物列表并按等级降序排列
         playerQueue = new LinkedList<>();
         List<Pokemon> playerPokemons = petList.stream()

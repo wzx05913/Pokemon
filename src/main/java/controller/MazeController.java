@@ -1,6 +1,7 @@
 // src/main/java/controller/MazeController.java
 package controller;
 
+import Music.BgMusicManager;
 import entity.Bag;
 import entity.Pet;
 import core.Maze;
@@ -45,6 +46,7 @@ public class MazeController {
 
     @FXML
     public void initialize() {
+        if (Music.BgMusicManager.isMusicEnabled())  Music.BgMusicManager.getInstance().playSceneMusic("maze");
         maze = new Maze();
         player = new MazePlayer(maze.getStart());
         gc = canvas.getGraphicsContext2D();
@@ -82,7 +84,6 @@ public class MazeController {
     @FXML
     private void onExitExploration(ActionEvent event) {
         try {
-            // 如果有 primaryStage，加载 bedroom-select 并设置回去
             if (this.primaryStage != null) {
                 java.net.URL resource = getClass().getResource("/bedroom-select.fxml");
                 if (resource == null) {
@@ -92,11 +93,17 @@ public class MazeController {
                 }
                 FXMLLoader loader = new FXMLLoader(resource);
                 Parent bedroomRoot = loader.load();
+                BedroomSelectController bedroomController = loader.getController();
 
-                // 如果需要，可以把 MainController / BedroomSelectController 相关引用注入
+                // 确保设置主控制器
+                if (mainController != null) {
+                    bedroomController.setMainController(mainController);
+                }
+
                 this.primaryStage.setScene(new Scene(bedroomRoot, 800, 600));
                 this.primaryStage.centerOnScreen();
                 this.primaryStage.show();
+                if (Music.BgMusicManager.isMusicEnabled())  Music.BgMusicManager.getInstance().playSceneMusic("bedroom");
             } else {
                 // 如果没有传入 Stage，直接关闭所在窗口
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -242,8 +249,11 @@ public class MazeController {
             showAlert("错误", "无法打开战斗界面：" + e.getMessage());
         }
     }
+    private MainController mainController;
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
-    // 到达终点回到卧室（与退出逻辑一致）
     private void goBackToBedroom() {
         try {
             if (this.primaryStage != null) {
@@ -254,8 +264,16 @@ public class MazeController {
                 }
                 FXMLLoader loader = new FXMLLoader(resource);
                 Parent bedroomRoot = loader.load();
+                BedroomSelectController bedroomController = loader.getController();
 
-                // 到达终点：先计算本次探索期间获得的金币并发放额外奖励200金币
+                // 关键修复：确保设置回主控制器
+                if (mainController != null) {
+                    bedroomController.setMainController(mainController);
+                } else {
+                    // 如果 mainController 为 null，尝试从 GameDataManager 或其它方式获取
+                    showAlert("提示", "返回主菜单，但主控制器未设置");
+                }
+
                 try {
                     int currentCoins = GameDataManager.getInstance().getPlayerBag() != null ?
                             (GameDataManager.getInstance().getPlayerBag().getCoins() != null ?
@@ -263,7 +281,6 @@ public class MazeController {
                     int explorationGain = currentCoins - coinsAtExplorationStart;
                     // 发放额外200金币
                     GameDataManager.getInstance().addCoins(200);
-                    // 同步到当前 Player.money（如果存在）
                     if (GameDataManager.getInstance().getCurrentPlayer() != null) {
                         Integer afterCoins = GameDataManager.getInstance().getPlayerBag() != null ?
                                 GameDataManager.getInstance().getPlayerBag().getCoins() : null;
@@ -271,12 +288,15 @@ public class MazeController {
                     }
                     showAlert("恭喜探索完成！", "探索获得：" + explorationGain + "个金币，抵达终点额外奖励200金币！");
                 } catch (Exception ex) {
-                    // 忽略错误，继续返回卧室
+                    ex.printStackTrace();
                 }
 
                 this.primaryStage.setScene(new Scene(bedroomRoot, 800, 600));
                 this.primaryStage.centerOnScreen();
                 this.primaryStage.show();
+
+                // 播放卧室音乐
+                Music.BgMusicManager.getInstance().playSceneMusic("bedroom");
             } else {
                 // 无 primaryStage 时弹提示并关闭当前窗口
                 Stage stage = (Stage) canvas.getScene().getWindow();

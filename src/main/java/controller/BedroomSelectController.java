@@ -9,6 +9,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import service.GameDataManager;
 import javafx.scene.control.Button;
@@ -16,6 +17,8 @@ import javafx.scene.control.Alert;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.StageStyle;
+
+import javax.swing.plaf.synth.Region;
 
 
 public class BedroomSelectController {
@@ -41,6 +44,7 @@ public class BedroomSelectController {
     // 初始化方法
     @FXML
     private void initialize() {
+        Music.BgMusicManager.getInstance().playSceneMusic("bedroom");
         System.out.println("BedroomSelectController初始化");
         // 可以在这里添加一些初始化代码
     }
@@ -58,17 +62,28 @@ public class BedroomSelectController {
                 a.showAndWait();
                 return;
             }
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(resource);
-            javafx.scene.Parent root = loader.load();
 
-            javafx.stage.Stage dialog = new javafx.stage.Stage();
+            FXMLLoader loader = new FXMLLoader(resource);
+            Parent root = loader.load();
+
+            Stage dialog = new Stage();
             dialog.initOwner(petButton.getScene().getWindow());
-            dialog.initModality(javafx.stage.Modality.WINDOW_MODAL); // 如需非模态，注释掉这行
-            dialog.setTitle("宠物管理");
-            dialog.setScene(new javafx.scene.Scene(root, 685, 444)); // 用你的 FXML尺寸
+            dialog.initModality(Modality.WINDOW_MODAL);
+
+            // 关键修改1：设置为透明无装饰窗口
+            dialog.initStyle(StageStyle.TRANSPARENT);
+            dialog.setTitle(""); // 移除标题
+
+            // 创建透明场景
+            Scene scene = new Scene(root, 685, 444);
+            scene.setFill(Color.TRANSPARENT); // 场景背景透明
+
+            dialog.setScene(scene);
             dialog.setResizable(false);
+
             dialog.centerOnScreen();
             dialog.show();
+
         } catch (Exception e) {
             e.printStackTrace();
             Alert a = new Alert(Alert.AlertType.ERROR);
@@ -81,10 +96,10 @@ public class BedroomSelectController {
 
     @FXML
     private void onsettingsButtonClick() {
-        opensettingsWindow();
+        opensettingsWindow(mainController);
     }
 
-    private void opensettingsWindow() {
+    private void opensettingsWindow(MainController mainController) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/settingswidget.fxml"));
             Parent saveLoadRoot = loader.load();
@@ -131,7 +146,7 @@ public class BedroomSelectController {
             // 使用GameDataManager获取当前玩家
             GameDataManager gameDataManager = GameDataManager.getInstance();
             Player currentUser = gameDataManager.getCurrentPlayer();
-            
+
             if (currentUser != null) {
                 saveLoadController.setCurrentPlayer(currentUser);
             } else {
@@ -142,13 +157,36 @@ public class BedroomSelectController {
             Stage saveLoadStage = new Stage();
             saveLoadStage.initModality(Modality.WINDOW_MODAL);
             saveLoadStage.initOwner(restButton.getScene().getWindow());
-            saveLoadStage.initStyle(StageStyle.UTILITY);
-            saveLoadStage.setTitle("存档管理");
 
+            // 关键：使用透明无装饰样式
+            saveLoadStage.initStyle(StageStyle.TRANSPARENT);
+            saveLoadStage.setTitle("");
+
+            // 创建场景，背景设为透明
             Scene scene = new Scene(saveLoadRoot);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             saveLoadStage.setScene(scene);
-            centerStage(saveLoadStage);
+
+            // 设置大小与FXML内容匹配
+            saveLoadStage.sizeToScene();
+
+
             saveLoadStage.setResizable(false);
+
+            // 添加ESC键关闭功能
+            scene.setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                    saveLoadStage.close();
+                }
+            });
+
+            // 添加点击外部关闭功能（可选）
+            saveLoadRoot.setOnMouseClicked(event -> {
+                if (event.getTarget() == saveLoadRoot) {
+                    saveLoadStage.close();
+                }
+            });
+            saveLoadStage.centerOnScreen();
             saveLoadStage.showAndWait();
 
         } catch (Exception e) {
@@ -218,15 +256,32 @@ public class BedroomSelectController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/shop.fxml"));
             Parent shopRoot = loader.load();
 
-            // 在新窗口中打开商店（使用较大尺寸以容纳内容）
+            // 创建商店窗口
             Stage shopStage = new Stage();
             shopStage.setTitle("宝可梦商店");
-            // 使用模态窗口并设置拥有者，避免被其他窗口遮挡
+
+            // 设置为模态窗口
             shopStage.initModality(Modality.WINDOW_MODAL);
             shopStage.initOwner(shopButton.getScene().getWindow());
-            Scene scene = new Scene(shopRoot, 800, 600); // 加大为 800x600
+
+            // 创建场景并设置透明
+            Scene scene = new Scene(shopRoot, 800, 600);
+            scene.setFill(Color.TRANSPARENT);
+
+            // 设置窗口样式 - 无装饰
+            shopStage.initStyle(StageStyle.TRANSPARENT);
             shopStage.setScene(scene);
             shopStage.setResizable(false);
+
+            // 确保场景背景透明
+            scene.getRoot().setStyle("-fx-background-color: transparent;");
+
+            // 将透明背景应用到根节点
+            shopRoot.setStyle("-fx-background-color: transparent;");
+
+            // 确保CSS样式不会覆盖透明背景
+            scene.getStylesheets().clear(); // 如果有CSS文件，可能需要特殊处理
+
             shopStage.centerOnScreen();
             shopStage.showAndWait();
 

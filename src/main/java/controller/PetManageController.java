@@ -1,28 +1,25 @@
 package controller;
 
-import java.util.List;
-
-import entity.Bag;
-import entity.Pet;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import entity.*;
 import pokemon.Pokemon;
-import pokemon.PokemonFactory;
-import service.GameDataManager;
 import service.PetFactory;
+import service.GameDataManager;
 
-/**
- * 宠物管理界面控制器
- */
-public class PetManageController {
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
+
+public class PetManageController implements Initializable {
+
     @FXML
     private ScrollPane petListScrollPane;
     @FXML
@@ -47,21 +44,27 @@ public class PetManageController {
     private Button useSoapButton;
     @FXML
     private Button useRiceButton;
-    // 道具数量标签
     @FXML
     private Label eggCountLabel;
     @FXML
     private Label soapCountLabel;
     @FXML
     private Label riceCountLabel;
+    @FXML
+    private Spinner<Integer> eggSpinner;
+    @FXML
+    private Spinner<Integer> soapSpinner;
+    @FXML
+    private Spinner<Integer> appleSpinner;
+
     private GameDataManager gameDataManager;
     private List<Pet> petList;
     private Bag playerBag;
     private Pet selectedPet;
     private Pokemon selectedPokemon;
 
-    @FXML
-    private void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         System.out.println("PetManageController 初始化");
 
         gameDataManager = GameDataManager.getInstance();
@@ -70,7 +73,7 @@ public class PetManageController {
         System.out.println("宠物列表: " + gameDataManager.getPetList());
 
         initUI();
-
+        initSpinners();
         loadPetList();
         updateItemCounts();
     }
@@ -98,6 +101,29 @@ public class PetManageController {
         } catch (Exception e) {
             System.err.println("无法加载默认图片: " + e.getMessage());
         }
+    }
+
+    /**
+     * 初始化Spinner组件
+     */
+    private void initSpinners() {
+        // 初始化蛋的Spinner，默认值为1，范围1-999
+        SpinnerValueFactory<Integer> eggValueFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1);
+        eggSpinner.setValueFactory(eggValueFactory);
+        eggSpinner.setEditable(true);
+
+        // 初始化肥皂的Spinner，默认值为1，范围1-999
+        SpinnerValueFactory<Integer> soapValueFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1);
+        soapSpinner.setValueFactory(soapValueFactory);
+        soapSpinner.setEditable(true);
+
+        // 初始化苹果的Spinner，默认值为1，范围1-999
+        SpinnerValueFactory<Integer> appleValueFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1);
+        appleSpinner.setValueFactory(appleValueFactory);
+        appleSpinner.setEditable(true);
     }
 
     private void loadPetList() {
@@ -219,7 +245,7 @@ public class PetManageController {
 
         if (expLabel != null) {
             int exp = pet.getExperience() != null ? pet.getExperience() : 0;
-            expLabel.setText(exp+"/"+selectedPokemon.getExpToNextLevel()); // 这里应该是升级所需经验
+            expLabel.setText(exp + "/" + selectedPokemon.getExpToNextLevel()); // 这里应该是升级所需经验
         }
 
         try {
@@ -246,7 +272,17 @@ public class PetManageController {
             }
         }
 
+        // 选择宠物时重置Spinner值
+        resetSpinners();
+    }
 
+    /**
+     * 重置Spinner值为默认值1
+     */
+    private void resetSpinners() {
+        eggSpinner.getValueFactory().setValue(1);
+        soapSpinner.getValueFactory().setValue(1);
+        appleSpinner.getValueFactory().setValue(1);
     }
 
     private void updateItemCounts() {
@@ -268,6 +304,45 @@ public class PetManageController {
         if (riceCountLabel != null) {
             riceCountLabel.setText("x" + (playerBag.getRiceCount() != null ? playerBag.getRiceCount() : 0));
         }
+
+        // 更新Spinner的最大值限制
+        updateSpinnerMaxValues();
+    }
+
+    /**
+     * 更新Spinner的最大值，不能超过背包中道具的数量
+     */
+    private void updateSpinnerMaxValues() {
+        if (playerBag == null) return;
+
+        int eggCount = playerBag.getEggCount() != null ? playerBag.getEggCount() : 0;
+        int soapCount = playerBag.getSoapCount() != null ? playerBag.getSoapCount() : 0;
+        int riceCount = playerBag.getRiceCount() != null ? playerBag.getRiceCount() : 0;
+
+        // 更新Spinner的最大值
+        SpinnerValueFactory<Integer> eggFactory = eggSpinner.getValueFactory();
+        if (eggFactory != null) {
+            eggFactory.setValue(Math.max(1, eggCount)); // 至少为1
+            if (eggSpinner.getValue() > eggCount) {
+                eggFactory.setValue(eggCount > 0 ? eggCount : 1);
+            }
+        }
+
+        SpinnerValueFactory<Integer> soapFactory = soapSpinner.getValueFactory();
+        if (soapFactory != null) {
+            soapFactory.setValue(Math.max(1, soapCount));
+            if (soapSpinner.getValue() > soapCount) {
+                soapFactory.setValue(soapCount > 0 ? soapCount : 1);
+            }
+        }
+
+        SpinnerValueFactory<Integer> appleFactory = appleSpinner.getValueFactory();
+        if (appleFactory != null) {
+            appleFactory.setValue(Math.max(1, riceCount));
+            if (appleSpinner.getValue() > riceCount) {
+                appleFactory.setValue(riceCount > 0 ? riceCount : 1);
+            }
+        }
     }
 
     @FXML
@@ -282,13 +357,19 @@ public class PetManageController {
             playerBag = gameDataManager.getPlayerBag();
         }
 
-        if (playerBag.getEggCount() == null || playerBag.getEggCount() <= 0) {
-            showAlert("提示", "蛋的数量不足");
+        int useCount = eggSpinner.getValue();
+        if (useCount <= 0) {
+            showAlert("提示", "使用数量必须大于0");
+            return;
+        }
+
+        if (playerBag.getEggCount() == null || playerBag.getEggCount() < useCount) {
+            showAlert("提示", "蛋的数量不足，当前只有 " + (playerBag.getEggCount() != null ? playerBag.getEggCount() : 0) + " 个");
             return;
         }
 
         // 使用蛋的逻辑
-        useEgg();
+        useEgg(useCount);
     }
 
     @FXML
@@ -302,13 +383,19 @@ public class PetManageController {
             playerBag = gameDataManager.getPlayerBag();
         }
 
-        if (playerBag.getSoapCount() == null || playerBag.getSoapCount() <= 0) {
-            showAlert("提示", "肥皂的数量不足");
+        int useCount = soapSpinner.getValue();
+        if (useCount <= 0) {
+            showAlert("提示", "使用数量必须大于0");
+            return;
+        }
+
+        if (playerBag.getSoapCount() == null || playerBag.getSoapCount() < useCount) {
+            showAlert("提示", "肥皂的数量不足，当前只有 " + (playerBag.getSoapCount() != null ? playerBag.getSoapCount() : 0) + " 个");
             return;
         }
 
         // 使用肥皂的逻辑
-        useSoap();
+        useSoap(useCount);
     }
 
     @FXML
@@ -322,58 +409,78 @@ public class PetManageController {
             playerBag = gameDataManager.getPlayerBag();
         }
 
-        if (playerBag.getRiceCount() == null || playerBag.getRiceCount() <= 0) {
-            showAlert("提示", "苹果的数量不足");
+        int useCount = appleSpinner.getValue();
+        if (useCount <= 0) {
+            showAlert("提示", "使用数量必须大于0");
+            return;
+        }
+
+        if (playerBag.getRiceCount() == null || playerBag.getRiceCount() < useCount) {
+            showAlert("提示", "苹果的数量不足，当前只有 " + (playerBag.getRiceCount() != null ? playerBag.getRiceCount() : 0) + " 个");
             return;
         }
 
         // 使用米饭的逻辑
-        useRice();
+        useRice(useCount);
+    }
+
+    @FXML
+    private void onExitClick() {
+        Stage currentStage = (Stage) petListScrollPane.getScene().getWindow();
+        currentStage.close();
     }
 
     /**
      * 使用蛋：让宠物的isAlive变成1
      */
-    private void useEgg() {
+    private void useEgg(int useCount) {
         if (selectedPet == null) {
             showAlert("提示", "请先选择一个宠物");
             return;
         }
-        if (playerBag.getEggCount() == null || playerBag.getEggCount() <= 0) {
+        if (playerBag.getEggCount() == null || playerBag.getEggCount() < useCount) {
             showAlert("提示", "蛋的数量不足");
             return;
         }
+
+        // 检查宠物是否已死亡
+        if (selectedPet.getAlive() != null && selectedPet.getAlive()) {
+            showAlert("提示", "宠物当前是活的，不需要复活");
+            return;
+        }
+
         // 更新Pet
         selectedPet.setAlive(true);
 
-        // 更新Pokemon
         if (selectedPokemon != null) {
             selectedPokemon.setAlive(true);
+            selectedPokemon.setClean(100);
         }
 
-        playerBag.setEggCount(playerBag.getEggCount() - 1);
-        selectedPokemon.setClean(100);
-        loadPetList();
+        playerBag.setEggCount(playerBag.getEggCount() - useCount);
+
+        updatePetListUI();
         updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);
         }
-        showAlert("成功", "使用蛋成功，宠物已复活");
+
+        showAlert("成功", "使用 " + useCount + " 个蛋成功，宠物已复活");
     }
 
-    private void useSoap() {
+    private void useSoap(int useCount) {
         if (selectedPet == null) {
             showAlert("提示", "请先选择一个宠物");
             return;
         }
-        if (playerBag.getSoapCount() == null || playerBag.getSoapCount() <= 0) {
+        if (playerBag.getSoapCount() == null || playerBag.getSoapCount() < useCount) {
             showAlert("提示", "肥皂的数量不足");
             return;
         }
 
-        // 计算新清洁度
         int currentClean = selectedPet.getClean() != null ? selectedPet.getClean() : 0;
-        int newClean = Math.min(100, currentClean + 30);
+        int cleanIncrease = 30 * useCount; // 每个肥皂增加30清洁度
+        int newClean = Math.min(100, currentClean + cleanIncrease);
 
         // 更新Pet
         selectedPet.setClean(newClean);
@@ -385,48 +492,65 @@ public class PetManageController {
         }
 
         // 减少背包中的肥皂数量
-        playerBag.setSoapCount(playerBag.getSoapCount() - 1);
+        playerBag.setSoapCount(playerBag.getSoapCount() - useCount);
 
+        // 更新UI
+        updatePetListUI();
         updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);
         }
 
-        showAlert("成功", "使用肥皂成功，清洁度增加30");
+        showAlert("成功", "使用 " + useCount + " 个肥皂成功，清洁度增加" + (newClean - currentClean));
     }
 
-
-    private void useRice() {
+    private void useRice(int useCount) {
         if (selectedPet == null) {
             showAlert("提示", "请先选择一个宠物");
             return;
         }
-        if (playerBag.getRiceCount() == null || playerBag.getRiceCount() <= 0) {
+        if (playerBag.getRiceCount() == null || playerBag.getRiceCount() < useCount) {
             showAlert("提示", "苹果的数量不足");
             return;
         }
 
+        int expIncrease = 100 * useCount; // 每个苹果增加100经验
         int currentExp = selectedPet.getExperience() != null ? selectedPet.getExperience() : 0;
-        int newExp = currentExp + 100;
+        int newExp = currentExp + expIncrease;
 
+        // 更新经验
         selectedPet.setExperience(newExp);
 
         if (selectedPokemon != null) {
             selectedPokemon.setExp(newExp);
+
+            // 检查是否可以升级
+            int levelsGained = 0;
             while (selectedPokemon.getExp() >= selectedPokemon.getExpToNextLevel()) {
                 selectedPokemon.levelUp();
+                levelsGained++;
+            }
+
+            // 更新等级
+            if (levelsGained > 0) {
                 selectedPet.setLevel(selectedPokemon.getLevel());
             }
         }
 
-        playerBag.setRiceCount(playerBag.getRiceCount() - 1);
+        playerBag.setRiceCount(playerBag.getRiceCount() - useCount);
 
+        updatePetListUI();
         updateItemCounts();
         if (selectedPet != null) {
             selectPet(selectedPet);
         }
 
-        showAlert("成功", "使用苹果成功，经验增加100");
+        String message = "使用 " + useCount + " 个苹果成功，经验增加" + expIncrease;
+        if (selectedPokemon != null && selectedPokemon.getLevel() > selectedPet.getLevel() - 1) {
+            message += "，宠物升到了 " + selectedPokemon.getLevel() + " 级！";
+        }
+
+        showAlert("成功", message);
     }
 
     private void showAlert(String title, String message) {
@@ -435,5 +559,54 @@ public class PetManageController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void updatePetListUI() {
+        VBox petVBox = (VBox) petListScrollPane.getContent();
+
+        if (petVBox == null) {
+            loadPetList();
+            return;
+        }
+
+        petList = gameDataManager.getPetList();
+
+        petVBox.getChildren().clear();
+
+        // 重新添加宠物按钮
+        for (Pet pet : petList) {
+            Button petButton = new Button();
+
+            // 设置按钮文本
+            String buttonText = pet.getName() + " (Lv." + pet.getLevel() + ")";
+
+            // 如果宠物已死亡，添加标记
+            if (pet.getAlive() != null && !pet.getAlive()) {
+                buttonText += " [已死亡]";
+            }
+
+            petButton.setText(buttonText);
+            petButton.setPrefWidth(160);
+            petButton.setMinHeight(40);
+            petButton.setMaxHeight(40);
+
+            // 设置按钮样式
+            String baseStyle = "-fx-font-size: 12px; -fx-font-weight: bold;";
+
+            // 如果宠物已死亡，按钮变灰
+            if (pet.getAlive() != null && !pet.getAlive()) {
+                petButton.setStyle(baseStyle + "-fx-text-fill: gray;");
+            } else {
+                petButton.setStyle(baseStyle);
+            }
+
+            final Pet currentPet = pet;  // 需要final或effectively final
+            petButton.setOnAction(e -> {
+                System.out.println("选择宠物: " + currentPet.getName() + " ID: " + currentPet.getPetId());
+                selectPet(currentPet);
+            });
+
+            petVBox.getChildren().add(petButton);
+        }
     }
 }

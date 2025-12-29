@@ -11,10 +11,9 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-        	
-        	// 初始化数据库连接（单例模式，首次调用创建连接池）
+            // 初始化数据库连接
             DBConnection.getInstance();
-            
+
             // 加载FXML文件
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
             Parent root = loader.load();
@@ -31,6 +30,9 @@ public class Main extends Application {
             // 显示窗口
             primaryStage.show();
 
+            // 直接用音乐管理器控制音乐，不要再 getController()！
+            Music.BgMusicManager.getInstance().playSceneMusic("cover");
+
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("加载FXML文件失败: " + e.getMessage());
@@ -41,7 +43,7 @@ public class Main extends Application {
         // 程序退出时关闭连接池
         DBConnection.getInstance().close();
     }
-    
+
     public static void main(String[] args) {
         // 启动JavaFX应用
         launch(args);

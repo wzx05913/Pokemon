@@ -1,5 +1,6 @@
 // MainController.java
 package controller;
+import Music.BgMusicManager;
 import javafx.application.Platform;
 import javafx.scene.input.MouseEvent;
 import Player.Player;
@@ -57,11 +58,10 @@ public class MainController {
                 loadPage("main", "/bedroom-select.fxml");
 
                 System.out.println("初始化完成");
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            // 将事件过滤器移到外面
         }
 
         // 在这里注册事件过滤器
@@ -126,16 +126,24 @@ public class MainController {
             if (container != null && container.getScene() != null) {
                 saveLoadStage.initOwner(container.getScene().getWindow());
             }
-            saveLoadStage.initStyle(StageStyle.UTILITY);
-            saveLoadStage.setTitle("存档管理（只读）");
 
+            // 关键修改：使用透明无装饰样式
+            saveLoadStage.initStyle(StageStyle.TRANSPARENT);
+            saveLoadStage.setTitle("");
+
+            // 创建场景，设置透明背景
             Scene scene = new Scene(saveLoadRoot);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             saveLoadStage.setScene(scene);
+            saveLoadStage.sizeToScene();
 
-            // 使用 JavaFX 提供的居中方法，避免依赖未初始化的宽高
             saveLoadStage.centerOnScreen();
+            saveLoadRoot.setOnMouseClicked(event -> {
+                if (event.getTarget() == saveLoadRoot) {
+                    saveLoadStage.close();
+                }
+            });
 
-            saveLoadStage.setResizable(false);
             saveLoadStage.showAndWait();
 
         } catch (Exception e) {
@@ -149,18 +157,6 @@ public class MainController {
         }
     }
 
-    // 继续下面的类内容（不变）...
-
-    // 创建新用户
-
-    //private void createNewUser() throws SQLException {
-    //UserDAO userDAO = new UserDAO();
-    //User newUser = userDAO.createUser();
-    //sessionManager.setCurrentUser(newUser);
-    //System.out.println("新用户创建成功，用户ID: " + newUser.getUserId());
-    //}
-
-    // 加载页面
     private void loadPage(String name, String fxmlPath) {
         try {
             System.out.println("正在加载页面: " + fxmlPath);
@@ -217,6 +213,7 @@ public class MainController {
     // 选择宠物
     public void selectPet(String petName) {
         try {
+            GameDataManager.getInstance().clearSession();
             int userId = -1;
             Pet pet = new Pet();
             pet.setName(petName);
@@ -293,7 +290,7 @@ public class MainController {
         alert.show();
     }
 
-    private void showAlert(String title, String content) {
+    void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -344,6 +341,7 @@ public class MainController {
     private void handleNewGame() {
         System.out.println("新游戏按钮被点击");
         switchToPageWithFade("dialog1");
+        BgMusicManager.getInstance().stopMusic();
     }
     @FXML
     private void enterMaze(ActionEvent event) {
@@ -373,7 +371,7 @@ public class MainController {
     @FXML
     void backToMain() {
         System.out.println("返回主菜单");
-        // 不需要加载main.fxml，因为已经在容器中
+        BgMusicManager.getInstance().playSceneMusic("cover");
         if (!container.getChildren().isEmpty()) {
             container.getChildren().clear();
             // 重新创建主菜单

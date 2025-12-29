@@ -4,11 +4,14 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.Pane?>
 
-
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="173.0" prefWidth="266.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controller.SettingsController">
-   <children>
-      <Button layoutX="101.0" layoutY="55.0" mnemonicParsing="false" text="返回标题" onAction="#backtomain"/>
-      <CheckBox layoutX="86.0" layoutY="102.0" mnemonicParsing="false" selected="true" text="开启背景音乐" />
-   </children>
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+      prefHeight="173.0" prefWidth="266.0" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.SettingsController">
+    <children>
+        <Button layoutX="101.0" layoutY="55.0" mnemonicParsing="false"
+                text="返回标题" onAction="#backtomain"/>
+        <CheckBox fx:id="musicCheckBox" layoutX="86.0" layoutY="102.0"
+                  mnemonicParsing="false" selected="true" text="开启背景音乐"
+                  onAction="#onMusicToggle"/>
+    </children>
 </Pane>

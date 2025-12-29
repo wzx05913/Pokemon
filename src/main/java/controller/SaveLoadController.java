@@ -654,6 +654,7 @@ public class SaveLoadController {
                 Stage stage = (Stage) closeButton.getScene().getWindow();
                 stage.close();
                 mainController.switchToPageWithFade("main");
+                Music.BgMusicManager.getInstance().playSceneMusic("bedroom");
                 return;
             }
 

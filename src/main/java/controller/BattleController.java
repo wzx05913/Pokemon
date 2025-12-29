@@ -80,7 +80,6 @@ public class BattleController {
         updateBattleUI();
         createMoveButtons();
         battleLog.appendText("战斗开始！");
-
         // 自动推进检查
         runAutoProgressLoop();
     }
@@ -426,7 +425,7 @@ public class BattleController {
             boolean isWin = (battleManager.getBattleResult() == BattleResult.PLAYER_WIN);
             battleEndCallback.accept(isWin);
         }
-
+        Music.BgMusicManager.getInstance().playSceneMusic("maze");
         movesContainer.getScene().getWindow().hide();
     }
 

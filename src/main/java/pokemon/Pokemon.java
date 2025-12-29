@@ -173,7 +173,7 @@ public abstract class Pokemon {
             if ("叫声".equals(moveName)) {
                 // 降低目标攻击（不可低于1）
                 if (target != null) {
-                    target.reduceAttack(5);
+                    target.reduceAttack();
                     System.out.println(name + " 使用了 叫声，降低了 " + target.getName() + " 的攻击！");
                 }
                 this.lastCritical = false;
@@ -188,13 +188,13 @@ public abstract class Pokemon {
                 return 0;
             } else if ("生长".equals(moveName)) {
                 // 提高自身攻击
-                this.increaseAttack(5);
+                this.increaseAttack();
                 System.out.println(name + " 使用了 生长，提升了自身攻击！");
                 this.lastCritical = false;
                 return 0;
             } else if ("缩入壳中".equals(moveName)) {
                 // 提高自身防御
-                this.increaseDefense(5);
+                this.increaseDefense();
                 System.out.println(name + " 使用了 缩入壳中，提升了自身防御！");
                 this.lastCritical = false;
                 return 0;
@@ -254,21 +254,20 @@ public abstract class Pokemon {
     }
 
     // 降低攻击（用于“叫声”等技能）
-    public void reduceAttack(int amount) {
-        this.attack = Math.max(1, this.attack - amount);
+    public void reduceAttack() {
+        this.attack = (int) Math.max(1, this.attack*0.8);
     }
 
     // 提高攻击（用于“生长”等技能）
-    public void increaseAttack(int amount) {
-        this.attack = Math.max(1, this.attack + amount);
+    public void increaseAttack() {
+        this.attack = (int) Math.max(1, this.attack*1.3);
     }
 
     // 提高防御（用于“缩入壳中”等技能）
-    public void increaseDefense(int amount) {
-        this.defense = Math.max(1, this.defense + amount);
+    public void increaseDefense() {
+        this.defense = (int) Math.max(1, this.defense*1.5);
     }
 
-    // 最近一次是否暴击（供 BattleManager 读取）
     public boolean wasLastCritical() {
         return lastCritical;
     }

@@ -3,12 +3,9 @@ package controller;
 import entity.Bag;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
+import javafx.stage.Stage;
 import service.GameDataManager;
 import Player.Player;
 import java.util.Optional;
@@ -35,6 +32,9 @@ public class ShopController {
 
 	@FXML
 	private Spinner<Integer> riceSpinner;
+
+    @FXML
+    private Button exitButton;
 
 	private GameDataManager dataManager = GameDataManager.getInstance();
 
@@ -170,6 +170,12 @@ public class ShopController {
 		showAlert("成功", "购买苹果成功！", AlertType.INFORMATION);
 		updateUI();
 	}
+
+    @FXML
+    private void exit() {
+        Stage currentStage = (Stage) exitButton.getScene().getWindow();
+        currentStage.close();
+    }
 
 	private void showAlert(String title, String content, AlertType type) {
 		Alert alert = new Alert(type);

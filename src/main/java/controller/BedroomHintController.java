@@ -18,6 +18,7 @@ public class BedroomHintController {
     private void onConfirmButtonClick() {
         System.out.println("我清楚了按钮被点击");
         if (mainController != null) {
+            Music.BgMusicManager.getInstance().playSceneMusic("bedroom");
             mainController.switchToPage("main");
         }
     }
@@ -25,7 +26,6 @@ public class BedroomHintController {
     // 初始化方法
     @FXML
     private void initialize() {
-        System.out.println("BedroomHintController初始化");
         if (confirmButton != null) {
             System.out.println("确认按钮已注入: " + confirmButton.getText());
         }
