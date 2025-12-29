@@ -266,12 +266,11 @@ public class MazeController {
                 Parent bedroomRoot = loader.load();
                 BedroomSelectController bedroomController = loader.getController();
 
-                // 关键修复：确保设置回主控制器
+                // 确保设置回主控制器（若未设置则不弹窗，仅记录日志）
                 if (mainController != null) {
                     bedroomController.setMainController(mainController);
                 } else {
-                    // 如果 mainController 为 null，尝试从 GameDataManager 或其它方式获取
-                    showAlert("提示", "返回主菜单，但主控制器未设置");
+                    System.err.println("Warning: mainController is null when returning from maze.");
                 }
 
                 try {

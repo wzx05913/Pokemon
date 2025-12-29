@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: transparant;;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ShopController">
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: transparant;;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ShopController">
 
     <children>
       <ImageView fitHeight="501.0" fitWidth="839.0" layoutX="52.0" layoutY="46.0" pickOnBounds="true" preserveRatio="true">
@@ -110,12 +110,12 @@
       </Label>
 
       <!-- 右上角显示当前金币 -->
-      <Label fx:id="coinLabel" layoutX="597.0" layoutY="160.0" prefHeight="24.0" prefWidth="109.0" text="金币数：0">
+      <Label fx:id="coinLabel" alignment="TOP_LEFT" layoutX="591.0" layoutY="114.0" prefHeight="69.0" prefWidth="142.0" text="金币数：0">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Button fx:id="exitButton" layoutX="693.0" layoutY="62.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="26.0" text="x" onAction="#exit">
+      <Button fx:id="exitButton" layoutX="693.0" layoutY="62.0" mnemonicParsing="false" onAction="#exit" prefHeight="31.0" prefWidth="26.0" text="x">
          <effect>
             <ColorAdjust brightness="0.6" contrast="0.95" />
          </effect>
