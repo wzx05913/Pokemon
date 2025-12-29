@@ -88,7 +88,7 @@ public class MazeController {
                 java.net.URL resource = getClass().getResource("/bedroom-select.fxml");
                 if (resource == null) {
                     System.err.println("无法找到 /bedroom-select.fxml");
-                    showAlert("错误", "找不到卧室页面资源(bedroom-select.fxml)。");
+                    // 不弹窗，避免不必要的提示
                     return;
                 }
                 FXMLLoader loader = new FXMLLoader(resource);
@@ -111,7 +111,8 @@ public class MazeController {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("错误", "返回卧室失败：" + e.getMessage());
+            // 切换失败时记录错误，但不弹出额外提示（避免与完成提示冲突）
+            System.err.println("返回卧室失败：" + e.getMessage());
         }
     }
 
@@ -259,7 +260,8 @@ public class MazeController {
             if (this.primaryStage != null) {
                 java.net.URL resource = getClass().getResource("/bedroom-select.fxml");
                 if (resource == null) {
-                    showAlert("错误", "找不到卧室页面资源(bedroom-select.fxml)。");
+                    System.err.println("找不到卧室页面资源(bedroom-select.fxml)。");
+                    // 不弹窗，继续尝试关闭窗口或其他后续处理
                     return;
                 }
                 FXMLLoader loader = new FXMLLoader(resource);
@@ -303,7 +305,8 @@ public class MazeController {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("错误", "返回卧室失败：" + e.getMessage());
+            // 记录错误但不弹窗
+            System.err.println("返回卧室失败：" + e.getMessage());
         }
     }
 
