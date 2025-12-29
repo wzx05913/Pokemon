@@ -110,12 +110,12 @@
       </Label>
 
       <!-- 右上角显示当前金币 -->
-      <Label fx:id="coinLabel" layoutX="597.0" layoutY="160.0" prefHeight="24.0" prefWidth="109.0" text="金币数：0">
+      <Label fx:id="coinLabel" alignment="TOP_LEFT" layoutX="581.0" layoutY="147.0" prefHeight="75.0" prefWidth="157.0" text="金币数：0">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Button fx:id="exitButton" layoutX="693.0" layoutY="62.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="26.0" text="x" onAction="#exit">
+      <Button fx:id="exitButton" layoutX="693.0" layoutY="62.0" mnemonicParsing="false" onAction="#exit" prefHeight="31.0" prefWidth="26.0" text="x">
          <effect>
             <ColorAdjust brightness="0.6" contrast="0.95" />
          </effect>
