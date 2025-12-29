@@ -1,7 +1,5 @@
-// battle/BattleStepResult.java
 package battle;
 
-// 战斗步骤结果
 public class BattleStepResult {
     private boolean success;
     private String message;

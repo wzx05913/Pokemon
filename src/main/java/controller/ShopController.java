@@ -40,7 +40,7 @@ public class ShopController {
 
 	@FXML
 	public void initialize() {
-		// 初始化 Spinner（可编辑，允许直接输入或上下箭头选择）
+		//Spinner
 		eggSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1));
 		eggSpinner.setEditable(true);
 		soapSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1));
@@ -89,7 +89,6 @@ public class ShopController {
 			return;
 		}
 
-		// 询问确认
 		Alert confirm = new Alert(AlertType.CONFIRMATION);
 		confirm.setTitle("确认购买");
 		confirm.setHeaderText(null);

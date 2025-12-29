@@ -26,12 +26,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
-/**
- * 迷宫游戏控制器（优化版）
- * - 添加“退出探索”按钮（onExitExploration）
- * - 添加右侧图示（legend）
- * - 在画布上绘制玩家（红点）和敌人（黄点），遇敌点来自 Maze 的 treasure 标记
- */
 public class MazeController {
     @FXML
     private Canvas canvas;
@@ -40,8 +34,7 @@ public class MazeController {
     private MazePlayer player;
     private GraphicsContext gc;
     private int cellSize;
-    private Stage primaryStage; // 由调用者（BedroomSelectController）传入同一个 Stage
-    // 记录探索开始时的金币数，用于到达终点时统计本次探索获得的金币
+    private Stage primaryStage;
     private int coinsAtExplorationStart = 0;
 
     @FXML
@@ -51,12 +44,12 @@ public class MazeController {
         player = new MazePlayer(maze.getStart());
         gc = canvas.getGraphicsContext2D();
 
-        // 计算单元格大小，根据当前画布尺寸动态计算
+        //计算单元格大小
         cellSize = Math.max(4, (int) (Math.min(canvas.getWidth(), canvas.getHeight()) / maze.getSize()));
 
         drawMaze();
 
-        // 记录探索开始时的金币数（用于到达终点时计算本次探索获得）
+        //记录探索开始时的金币数
         try {
             Integer coins = GameDataManager.getInstance().getPlayerBag() != null ?
                     GameDataManager.getInstance().getPlayerBag().getCoins() : null;
@@ -65,7 +58,7 @@ public class MazeController {
             coinsAtExplorationStart = 0;
         }
 
-        // 键盘事件监听（在 canvas 上）
+        //键盘事件
         canvas.setOnKeyPressed(event -> {
             KeyCode code = event.getCode();
             handleMovement(code);
@@ -75,12 +68,10 @@ public class MazeController {
         canvas.requestFocus();
     }
 
-    // 供外部注入 Stage（BedroomSelectController 会传入当前 Stage）
     public void setPrimaryStage(Stage stage) {
         this.primaryStage = stage;
     }
 
-    // 退出探索（回到卧室/bedroom-select）
     @FXML
     private void onExitExploration(ActionEvent event) {
         try {
@@ -88,14 +79,13 @@ public class MazeController {
                 java.net.URL resource = getClass().getResource("/bedroom-select.fxml");
                 if (resource == null) {
                     System.err.println("无法找到 /bedroom-select.fxml");
-                    // 不弹窗，避免不必要的提示
                     return;
                 }
                 FXMLLoader loader = new FXMLLoader(resource);
                 Parent bedroomRoot = loader.load();
                 BedroomSelectController bedroomController = loader.getController();
 
-                // 确保设置主控制器
+                //确保设置主控制器
                 if (mainController != null) {
                     bedroomController.setMainController(mainController);
                 }
@@ -105,18 +95,16 @@ public class MazeController {
                 this.primaryStage.show();
                 if (Music.BgMusicManager.isMusicEnabled())  Music.BgMusicManager.getInstance().playSceneMusic("bedroom");
             } else {
-                // 如果没有传入 Stage，直接关闭所在窗口
+                //如果没有传入 Stage，直接关闭所在窗口
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 stage.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
-            // 切换失败时记录错误，但不弹出额外提示（避免与完成提示冲突）
             System.err.println("返回卧室失败：" + e.getMessage());
         }
     }
 
-    // 处理移动并触发重绘/事件
     private void handleMovement(KeyCode code) {
         int newX = player.getX();
         int newY = player.getY();
@@ -132,15 +120,13 @@ public class MazeController {
         if (!maze.isWall(newX, newY)) {
             player.setPosition(newX, newY);
 
-            // 如果到达遇敌点（Maze 中的 treasure），触发战斗并清除该点
+            //如果到达遇敌点（Maze 中的 treasure），触发战斗并清除该点
             if (maze.isTreasure(newX, newY)) {
-                // 把该点清空，防止重复触发
                 maze.getGrid()[newX][newY] = 0;
-                drawMaze(); // 先刷新迷宫显示（把该黄点清掉）
+                drawMaze();
                 openFightingWindow();
             }
 
-            // 到达终点
             if (maze.isEnd(newX, newY)) {
                 goBackToBedroom();
                 return;
@@ -150,7 +136,6 @@ public class MazeController {
         }
     }
 
-    // 绘制迷宫、遇敌点（黄色圆点）、玩家（红色圆点）、终点（绿色格）
     private void drawMaze() {
         double width = canvas.getWidth();
         double height = canvas.getHeight();
@@ -170,54 +155,38 @@ public class MazeController {
                     gc.setFill(Color.BLACK);
                     gc.fillRect(x, y, cellSize, cellSize);
                 } else {
-                    // 地面
+                    //地面
                     gc.setFill(Color.LIGHTGRAY);
                     gc.fillRect(x, y, cellSize, cellSize);
                 }
 
-                // 终点
+                //终点
                 if (maze.isEnd(i, j)) {
                     gc.setFill(Color.GREEN);
                     gc.fillRect(x, y, cellSize, cellSize);
                 }
 
-                // 遇敌点（原来的 treasure）绘制为黄色圆点
                 if (maze.isTreasure(i, j)) {
                     gc.setFill(Color.YELLOW);
                     double cx = x + cellSize / 2.0;
                     double cy = y + cellSize / 2.0;
-                    // 放大遇敌黄色点的直径
                     double r = Math.max(6, cellSize * 0.5);
                     gc.fillOval(cx - r/2, cy - r/2, r, r);
                 }
             }
         }
 
-        // 绘制玩家（红点）在其当前格子中心
         int px = player.getX();
         int py = player.getY();
         if (px >= 0 && py >= 0 && px < size && py < size) {
             double pxX = py * cellSize + cellSize / 2.0;
             double pxY = px * cellSize + cellSize / 2.0;
-            // 放大玩家红点的直径
             double pr = Math.max(8, cellSize * 0.6);
             gc.setFill(Color.RED);
             gc.fillOval(pxX - pr/2, pxY - pr/2, pr, pr);
         }
-
-        // 注：以下原来用于绘制网格灰色边的代码会在黑色障碍（墙）上出现灰边。
-        // 按需求将其注释掉以移除黑色方形的灰色边缘（保留代码以便恢复）。
-        /*
-        gc.setStroke(Color.gray(0.8));
-        gc.setLineWidth(0.5);
-        for (int i = 0; i <= size; i++) {
-            gc.strokeLine(0, i * cellSize, size * cellSize, i * cellSize);
-            gc.strokeLine(i * cellSize, 0, i * cellSize, size * cellSize);
-        }
-        */
     }
 
-    // 打开战斗窗口（保持原有逻辑：加载 Battle 界面并传入玩家宠物）
     private void openFightingWindow() {
         try {
             java.net.URL url = getClass().getResource("/BattleView.fxml");
@@ -231,8 +200,6 @@ public class MazeController {
             BattleController battleController = loader.getController();
 
             List<Pet> petList = new ArrayList<>(GameDataManager.getInstance().getPetList());
-            // 如果需要从 Player 构造 PetList，这里补充逻辑
-
             Stage dialog = new Stage();
             dialog.initOwner(this.primaryStage != null ? this.primaryStage : (Stage) canvas.getScene().getWindow());
             dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
@@ -261,14 +228,12 @@ public class MazeController {
                 java.net.URL resource = getClass().getResource("/bedroom-select.fxml");
                 if (resource == null) {
                     System.err.println("找不到卧室页面资源(bedroom-select.fxml)。");
-                    // 不弹窗，继续尝试关闭窗口或其他后续处理
                     return;
                 }
                 FXMLLoader loader = new FXMLLoader(resource);
                 Parent bedroomRoot = loader.load();
                 BedroomSelectController bedroomController = loader.getController();
 
-                // 确保设置回主控制器（若未设置则不弹窗，仅记录日志）
                 if (mainController != null) {
                     bedroomController.setMainController(mainController);
                 } else {
@@ -280,7 +245,6 @@ public class MazeController {
                             (GameDataManager.getInstance().getPlayerBag().getCoins() != null ?
                                     GameDataManager.getInstance().getPlayerBag().getCoins() : 0) : 0;
                     int explorationGain = currentCoins - coinsAtExplorationStart;
-                    // 发放额外200金币
                     GameDataManager.getInstance().addCoins(200);
                     if (GameDataManager.getInstance().getCurrentPlayer() != null) {
                         Integer afterCoins = GameDataManager.getInstance().getPlayerBag() != null ?
@@ -296,21 +260,18 @@ public class MazeController {
                 this.primaryStage.centerOnScreen();
                 this.primaryStage.show();
 
-                // 播放卧室音乐
                 Music.BgMusicManager.getInstance().playSceneMusic("bedroom");
             } else {
-                // 无 primaryStage 时弹提示并关闭当前窗口
                 Stage stage = (Stage) canvas.getScene().getWindow();
                 stage.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
-            // 记录错误但不弹窗
             System.err.println("返回卧室失败：" + e.getMessage());
         }
     }
 
-    // 辅助：显示信息提示
+    //显示信息提示
     private void showAlert(String title, String content) {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle(title);
@@ -319,7 +280,6 @@ public class MazeController {
         alert.showAndWait();
     }
 
-    // 供测试或外部使用：可手动设置玩家位置
     public void setPlayerPosition(int x, int y) {
         player.setPosition(x, y);
         drawMaze();

@@ -50,7 +50,6 @@ public abstract class Pokemon {
     }
     public int basicAttack(Pokemon target) {
         if (target == null) return 0;
-        // 计算：基础伤害以攻击的80%为主，再略微考虑防御
         int raw = (int)Math.round(this.attack * 0.8);
         int reduction = target.getDefense() / 4; // 防御只削弱一部分
         int damage = Math.max(1, raw - reduction);
@@ -112,19 +111,21 @@ public abstract class Pokemon {
     // 获得经验
     public void gainExp(int expGained) {
         this.exp += expGained;
-        if (this.exp >= this.expToNextLevel) {
+        while (this.exp >= this.expToNextLevel) {
+            int remainingExp = this.exp - this.expToNextLevel;
             levelUp();
-            exp = exp % this.expToNextLevel;
+            this.exp = remainingExp;
         }
     }
 
     // 升级
     public void levelUp() {
         this.level++;
-        this.exp -= this.expToNextLevel;
+
+        // 重新计算下一级所需经验
         this.expToNextLevel = calculateExpToNextLevel();
 
-        // 升级成长（子类可以重写）
+        // 属性成长
         this.maxHp += 10;
         this.attack += 5;
         this.defense += 5;
@@ -168,7 +169,6 @@ public abstract class Pokemon {
 
             pp -= move.getPpCost();
 
-            // 特殊技能判定（通过名字简单匹配）
             String moveName = move.getName();
             if ("叫声".equals(moveName)) {
                 // 降低目标攻击（不可低于1）

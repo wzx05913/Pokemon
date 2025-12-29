@@ -109,12 +109,7 @@
          </font>
       </Label>
 
-      <!-- 右上角显示当前金币 -->
-<<<<<<< HEAD
       <Label fx:id="coinLabel" alignment="TOP_LEFT" layoutX="591.0" layoutY="114.0" prefHeight="69.0" prefWidth="142.0" text="金币数：0">
-=======
-      <Label fx:id="coinLabel" alignment="TOP_LEFT" layoutX="581.0" layoutY="147.0" prefHeight="75.0" prefWidth="157.0" text="金币数：0">
->>>>>>> f8f31153ce7b1af99fcd524fc4045a9988095353
          <font>
             <Font size="18.0" />
          </font>

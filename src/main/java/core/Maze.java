@@ -3,9 +3,6 @@ package core;
 
 import java.util.Random;
 
-/**
- * 迷宫模型类，负责迷宫生成
- */
 public class Maze {
     private static final int SIZE = 15; // 固定迷宫大小45x45
     private static final int WALL = 1;
@@ -34,9 +31,6 @@ public class Maze {
         }
     }
 
-    /**
-     * 使用深度优先搜索生成迷宫
-     */
     private void generateMaze() {
         Random random = new Random();
         // 从左上角开始(1,1)
@@ -44,15 +38,14 @@ public class Maze {
     }
 
     private void dfs(int x, int y, Random random) {
-        // 标记当前单元格为路径
         grid[x][y] = PATH;
 
-        // 四个方向: 上、右、下、左
+        // 四个方向
         int[] dx = {-2, 0, 2, 0};
         int[] dy = {0, 2, 0, -2};
         int[] order = {0, 1, 2, 3};
 
-        // 随机打乱方向
+        //打乱方向
         for (int i = 0; i < 4; i++) {
             int j = random.nextInt(4);
             int temp = order[i];
@@ -60,7 +53,7 @@ public class Maze {
             order[j] = temp;
         }
 
-        // 尝试每个方向
+        //尝试每个方向
         for (int dir : order) {
             int nx = x + dx[dir];
             int ny = y + dy[dir];

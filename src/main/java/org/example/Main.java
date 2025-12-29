@@ -13,7 +13,6 @@ public class Main extends Application {
         try {
             // 初始化数据库连接
             DBConnection.getInstance();
-
             // 加载FXML文件
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
             Parent root = loader.load();

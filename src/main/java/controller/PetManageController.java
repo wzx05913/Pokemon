@@ -78,9 +78,6 @@ public class PetManageController implements Initializable {
         updateItemCounts();
     }
 
-    /**
-     * 初始化UI组件
-     */
     private void initUI() {
         // 设置默认文本
         nameLabel.setText("未选择宠物");
@@ -94,7 +91,6 @@ public class PetManageController implements Initializable {
             expLabel.setText("--/--");
         }
 
-        // 设置默认图片
         try {
             Image defaultImage = new Image(getClass().getResourceAsStream("/images/default_pet.png"));
             petImageView.setImage(defaultImage);
@@ -103,23 +99,17 @@ public class PetManageController implements Initializable {
         }
     }
 
-    /**
-     * 初始化Spinner组件
-     */
     private void initSpinners() {
-        // 初始化蛋的Spinner，默认值为1，范围1-999
         SpinnerValueFactory<Integer> eggValueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1);
         eggSpinner.setValueFactory(eggValueFactory);
         eggSpinner.setEditable(true);
 
-        // 初始化肥皂的Spinner，默认值为1，范围1-999
         SpinnerValueFactory<Integer> soapValueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1);
         soapSpinner.setValueFactory(soapValueFactory);
         soapSpinner.setEditable(true);
 
-        // 初始化苹果的Spinner，默认值为1，范围1-999
         SpinnerValueFactory<Integer> appleValueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1);
         appleSpinner.setValueFactory(appleValueFactory);
@@ -128,16 +118,12 @@ public class PetManageController implements Initializable {
 
     private void loadPetList() {
         try {
-            // 获取宠物列表
             petList = gameDataManager.getPetList();
-
-            // 调试：打印宠物列表
             System.out.println("从GameDataManager获取宠物列表，数量: " + (petList != null ? petList.size() : 0));
 
             if (petList == null || petList.isEmpty()) {
                 System.out.println("宠物列表为空");
 
-                // 如果没有宠物，显示提示
                 Label noPetsLabel = new Label("暂无宠物");
                 noPetsLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: gray; -fx-alignment: center;");
                 noPetsLabel.setPrefWidth(160);
@@ -152,19 +138,15 @@ public class PetManageController implements Initializable {
                 return;
             }
 
-            // 创建垂直布局容器
             VBox petVBox = new VBox(10);
             petVBox.setPadding(new Insets(10));
             petVBox.setPrefWidth(160);
 
-            // 为每个宠物创建按钮
             for (Pet pet : petList) {
                 Button petButton = new Button();
 
-                // 设置按钮文本
                 String buttonText = pet.getName() + " (Lv." + pet.getLevel() + ")";
 
-                // 如果宠物已死亡，添加标记
                 if (pet.getAlive() != null && !pet.getAlive()) {
                     buttonText += " [已死亡]";
                 }
@@ -174,15 +156,12 @@ public class PetManageController implements Initializable {
                 petButton.setMinHeight(40);
                 petButton.setMaxHeight(40);
 
-                // 设置按钮样式
                 petButton.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
 
-                // 如果宠物已死亡，按钮变灰
                 if (pet.getAlive() != null && !pet.getAlive()) {
                     petButton.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: gray;");
                 }
 
-                // 设置点击事件
                 petButton.setOnAction(e -> {
                     System.out.println("选择宠物: " + pet.getName() + " ID: " + pet.getPetId());
                     selectPet(pet);
@@ -191,11 +170,9 @@ public class PetManageController implements Initializable {
                 petVBox.getChildren().add(petButton);
             }
 
-            // 设置滚动面板内容
             petListScrollPane.setContent(petVBox);
             petListScrollPane.setFitToWidth(true);
 
-            // 如果有宠物，默认选择第一个
             if (!petList.isEmpty()) {
                 selectPet(petList.get(0));
             }
@@ -272,13 +249,10 @@ public class PetManageController implements Initializable {
             }
         }
 
-        // 选择宠物时重置Spinner值
+        //选择宠物时重置Spinner值
         resetSpinners();
     }
-
-    /**
-     * 重置Spinner值为默认值1
-     */
+    //重置
     private void resetSpinners() {
         eggSpinner.getValueFactory().setValue(1);
         soapSpinner.getValueFactory().setValue(1);
@@ -305,13 +279,10 @@ public class PetManageController implements Initializable {
             riceCountLabel.setText("x" + (playerBag.getRiceCount() != null ? playerBag.getRiceCount() : 0));
         }
 
-        // 更新Spinner的最大值限制
+        //更新Spinner的最大值限制
         updateSpinnerMaxValues();
     }
 
-    /**
-     * 更新Spinner的最大值，不能超过背包中道具的数量
-     */
     private void updateSpinnerMaxValues() {
         if (playerBag == null) return;
 
@@ -368,7 +339,6 @@ public class PetManageController implements Initializable {
             return;
         }
 
-        // 使用蛋的逻辑
         useEgg(useCount);
     }
 
@@ -394,7 +364,6 @@ public class PetManageController implements Initializable {
             return;
         }
 
-        // 使用肥皂的逻辑
         useSoap(useCount);
     }
 
@@ -420,7 +389,6 @@ public class PetManageController implements Initializable {
             return;
         }
 
-        // 使用米饭的逻辑
         useRice(useCount);
     }
 
@@ -430,9 +398,6 @@ public class PetManageController implements Initializable {
         currentStage.close();
     }
 
-    /**
-     * 使用蛋：让宠物的isAlive变成1
-     */
     private void useEgg(int useCount) {
         if (selectedPet == null) {
             showAlert("提示", "请先选择一个宠物");
@@ -443,14 +408,13 @@ public class PetManageController implements Initializable {
             return;
         }
 
-        // 检查宠物是否已死亡
         if (selectedPet.getAlive() != null && selectedPet.getAlive()) {
             showAlert("提示", "宠物当前是活的，不需要复活");
             return;
         }
 
-        // 更新Pet
         selectedPet.setAlive(true);
+        selectedPet.setClean(100);
 
         if (selectedPokemon != null) {
             selectedPokemon.setAlive(true);
@@ -482,19 +446,16 @@ public class PetManageController implements Initializable {
         int cleanIncrease = 30 * useCount; // 每个肥皂增加30清洁度
         int newClean = Math.min(100, currentClean + cleanIncrease);
 
-        // 更新Pet
         selectedPet.setClean(newClean);
 
-        // 更新Pokemon
         if (selectedPokemon != null) {
             selectedPokemon.setClean(newClean);
             selectedPokemon.setHp((int)(newClean * 0.01 * selectedPokemon.getMaxHp()));
         }
 
-        // 减少背包中的肥皂数量
         playerBag.setSoapCount(playerBag.getSoapCount() - useCount);
 
-        // 更新UI
+        //更新UI
         updatePetListUI();
         updateItemCounts();
         if (selectedPet != null) {
@@ -513,28 +474,20 @@ public class PetManageController implements Initializable {
             showAlert("提示", "苹果的数量不足");
             return;
         }
-
-        int expIncrease = 100 * useCount; // 每个苹果增加100经验
+        int expIncrease = 150 * useCount; // 每个苹果增加150经验
         int currentExp = selectedPet.getExperience() != null ? selectedPet.getExperience() : 0;
         int newExp = currentExp + expIncrease;
-
         // 更新经验
         selectedPet.setExperience(newExp);
-
         if (selectedPokemon != null) {
-            selectedPokemon.setExp(newExp);
+            selectedPokemon.gainExp(expIncrease);
 
-            // 检查是否可以升级
-            int levelsGained = 0;
-            while (selectedPokemon.getExp() >= selectedPokemon.getExpToNextLevel()) {
-                selectedPokemon.levelUp();
-                levelsGained++;
-            }
-
-            // 更新等级
-            if (levelsGained > 0) {
-                selectedPet.setLevel(selectedPokemon.getLevel());
-            }
+            selectedPet.setExperience(selectedPokemon.getExp());
+            selectedPet.setLevel(selectedPokemon.getLevel());
+            selectedPet.setAttack(selectedPokemon.getAttack());
+        } else {
+            int newexp = currentExp + expIncrease;
+            selectedPet.setExperience(newexp);
         }
 
         playerBag.setRiceCount(playerBag.getRiceCount() - useCount);
@@ -546,7 +499,7 @@ public class PetManageController implements Initializable {
         }
 
         String message = "使用 " + useCount + " 个苹果成功，经验增加" + expIncrease;
-        if (selectedPokemon != null && selectedPokemon.getLevel() > selectedPet.getLevel() - 1) {
+        if (selectedPokemon != null && selectedPokemon.getLevel() > selectedPet.getLevel()-1) {
             message += "，宠物升到了 " + selectedPokemon.getLevel() + " 级！";
         }
 
@@ -573,14 +526,11 @@ public class PetManageController implements Initializable {
 
         petVBox.getChildren().clear();
 
-        // 重新添加宠物按钮
         for (Pet pet : petList) {
             Button petButton = new Button();
 
-            // 设置按钮文本
             String buttonText = pet.getName() + " (Lv." + pet.getLevel() + ")";
 
-            // 如果宠物已死亡，添加标记
             if (pet.getAlive() != null && !pet.getAlive()) {
                 buttonText += " [已死亡]";
             }
@@ -590,17 +540,15 @@ public class PetManageController implements Initializable {
             petButton.setMinHeight(40);
             petButton.setMaxHeight(40);
 
-            // 设置按钮样式
             String baseStyle = "-fx-font-size: 12px; -fx-font-weight: bold;";
 
-            // 如果宠物已死亡，按钮变灰
             if (pet.getAlive() != null && !pet.getAlive()) {
                 petButton.setStyle(baseStyle + "-fx-text-fill: gray;");
             } else {
                 petButton.setStyle(baseStyle);
             }
 
-            final Pet currentPet = pet;  // 需要final或effectively final
+            final Pet currentPet = pet;
             petButton.setOnAction(e -> {
                 System.out.println("选择宠物: " + currentPet.getName() + " ID: " + currentPet.getPetId());
                 selectPet(currentPet);

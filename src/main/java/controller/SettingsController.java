@@ -18,14 +18,13 @@ public class SettingsController {
     private CheckBox musicCheckBox;
     private MainController mainController;
 
-    // 设置主控制器的方法
+    //设置主控制器的方法
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
     @FXML
     private void initialize() {
-        // 设置CheckBox初始状态
         musicCheckBox.setSelected(Music.BgMusicManager.isMusicEnabled());
     }
 
@@ -34,8 +33,6 @@ public class SettingsController {
         // 关闭当前窗口
         Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         currentStage.close();
-
-        // 直接重新加载主界面
         try {
             for (Window window : Window.getWindows()) {
                 if (window instanceof Stage) {
@@ -46,7 +43,6 @@ public class SettingsController {
                         Scene scene = new Scene(root, 800, 600);
                         stage.setScene(scene);
 
-                        // 根据设置播放音乐
                         if (Music.BgMusicManager.isMusicEnabled()) {
                             Music.BgMusicManager.getInstance().playSceneMusic("cover");
                         }
@@ -55,7 +51,7 @@ public class SettingsController {
                 }
             }
 
-            // 如果没有找到主舞台，创建新的
+            //如果没有找到主舞台，创建新的
             Stage newStage = new Stage();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
             Parent root = loader.load();
@@ -78,10 +74,9 @@ public class SettingsController {
     @FXML
     private void onMusicToggle(ActionEvent event) {
         boolean isSelected = musicCheckBox.isSelected();
-        // 设置音乐开关
+        //设置音乐开关
         Music.BgMusicManager.setMusicEnabled(isSelected);
 
-        // 如果选中，播放当前场景音乐
         if (isSelected) {
             Music.BgMusicManager.getInstance().playSceneMusic("bedroom");
         }

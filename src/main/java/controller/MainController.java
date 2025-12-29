@@ -1,4 +1,3 @@
-// MainController.java
 package controller;
 import Music.BgMusicManager;
 import javafx.application.Platform;
@@ -64,12 +63,12 @@ public class MainController {
             }
         }
 
-        // 在这里注册事件过滤器
+        //在这里注册事件过滤器
         container.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
             if (!container.getChildren().isEmpty()) {
                 Node currentNode = container.getChildren().get(0);
 
-                // 使用页面名称比较
+                //页面名称比较
                 String currentPageName = getCurrentPageName(currentNode);
                 System.out.println("当前页面: " + currentPageName);
 
@@ -82,7 +81,7 @@ public class MainController {
         });
     }
 
-    // 添加辅助方法获取当前页面名称
+    //获取当前页面名称
     private String getCurrentPageName(Node node) {
         for (Map.Entry<String, Parent> entry : pages.entrySet()) {
             if (entry.getValue() == node) {
@@ -96,9 +95,7 @@ public class MainController {
     @FXML
     private void handleContinueGame() {
         System.out.println("继续游戏按钮被点击");
-        // 弹出存档管理窗口，但处于只读模式（只能读取，不能保存或删除）
         try {
-            // 先检查资源是否存在，避免 "Location is not set"
             java.net.URL resource = getClass().getResource("/savewidget.fxml");
             if (resource == null) {
                 System.err.println("无法找到 /savewidget.fxml");
@@ -114,11 +111,10 @@ public class MainController {
             Parent saveLoadRoot = loader.load();
             controller.SaveLoadController saveLoadController = loader.getController();
 
-            // 设置只读模式并传入主控制器引用（以便读档后跳转页面）
+            //设置只读模式
             saveLoadController.setReadOnly(true);
             saveLoadController.setMainController(this);
 
-            // 将当前会话中的玩家传入（可能为 null）
             saveLoadController.setCurrentPlayer(GameDataManager.getInstance().getCurrentPlayer());
 
             Stage saveLoadStage = new Stage();
@@ -127,11 +123,9 @@ public class MainController {
                 saveLoadStage.initOwner(container.getScene().getWindow());
             }
 
-            // 关键修改：使用透明无装饰样式
             saveLoadStage.initStyle(StageStyle.TRANSPARENT);
             saveLoadStage.setTitle("");
 
-            // 创建场景，设置透明背景
             Scene scene = new Scene(saveLoadRoot);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             saveLoadStage.setScene(scene);
@@ -167,20 +161,18 @@ public class MainController {
                 FXMLLoader loader = new FXMLLoader(resource);
                 Parent page = loader.load();
 
-                // 获取控制器
                 Object controller = loader.getController();
 
                 if ("select".equals(name)) {
                     SelectController selectController = (SelectController) controller;
                     selectController.setMainController(this);
                 } else if ("hint".equals(name)) {
-                    // 为hint页面设置控制器
                     if (controller instanceof BedroomHintController) {
                         BedroomHintController hintController = (BedroomHintController) controller;
                         hintController.setMainController(this);
                         System.out.println("BedroomHintController设置成功");
                     }
-                }else if ("main".equals(name)) {  // 注意：这里是"main"，对应bedroom-select
+                }else if ("main".equals(name)) {
                     if (controller instanceof BedroomSelectController) {
                         BedroomSelectController selectController = (BedroomSelectController) controller;
                         selectController.setMainController(this);
@@ -210,7 +202,7 @@ public class MainController {
         }
     }
 
-    // 选择宠物
+    //选择宠物
     public void selectPet(String petName) {
         try {
             GameDataManager.getInstance().clearSession();
@@ -260,7 +252,6 @@ public class MainController {
         alert.setHeaderText(null);
         alert.setContentText("恭喜！你选择了" + petName + "！\n游戏即将开始...");
 
-        // 把 owner 设置为主窗口，避免焦点/模态问题
         if (container != null && container.getScene() != null) {
             alert.initOwner(container.getScene().getWindow());
         }
@@ -281,9 +272,7 @@ public class MainController {
                         System.out.println("[DEBUG] current child equals pages.get(\"main1\")? " + (curr == pages.get("main1")));
                     }
                 }
-                // 先尝试直接切换（无动画）
                 switchToPage("main1");
-                // 如果你仍想用淡入淡出，改为 switchToPageWithFade("main1");
             });
         });
 
@@ -346,7 +335,6 @@ public class MainController {
     @FXML
     private void enterMaze(ActionEvent event) {
         try {
-            // 加载迷宫入口窗口
             java.net.URL resource = getClass().getResource("/mazeEntry.fxml");
             if (resource == null) {
                 System.err.println("无法找到 /mazeEntry.fxml");
@@ -397,7 +385,6 @@ public class MainController {
         }
     }
 
-    // 居中显示窗口
     private void centerStage(Stage stage) {
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         double centerX = screenBounds.getMinX() + (screenBounds.getWidth() - stage.getWidth()) / 2;

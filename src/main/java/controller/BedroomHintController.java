@@ -23,7 +23,6 @@ public class BedroomHintController {
         }
     }
 
-    // 初始化方法
     @FXML
     private void initialize() {
         if (confirmButton != null) {
