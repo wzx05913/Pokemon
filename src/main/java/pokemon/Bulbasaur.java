@@ -28,7 +28,7 @@ public class Bulbasaur extends Pokemon {
     @Override
     public void levelUp() {
         super.levelUp();
-        // 妙蛙种子平衡成长
+        //妙蛙种子平衡成长
         this.attack += 4;
         this.defense += 4;
     }

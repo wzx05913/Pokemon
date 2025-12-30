@@ -4,24 +4,20 @@ package service;
 import pokemon.*;
 import entity.Pet;
 
-/**
- * 宠物工厂，用于创建数据库实体和游戏对象
- */
 public class PetFactory {
     public static Pet createPetEntity(int userId, Pokemon pokemon) {
         Pet pet = new Pet();
         pet.setUserId(userId);
         pet.setName(pokemon.getName());
-        pet.setType(pokemon.getName());  // 类型和名称相同（保存为中文名称）
+        pet.setType(pokemon.getName());
         pet.setLevel(pokemon.getLevel());
         pet.setAttack(pokemon.getAttack());
-        pet.setClean(100);  // 初始清洁度
+        pet.setClean(100);
         pet.setExperience(pokemon.getExp());
         pet.setAlive(true);
         return pet;
     }
 
-    // 根据Pet实体创建Pokemon（修复：使用 getType()，不是 getName()）
     public static Pokemon createPokemon(Pet petEntity) {
         if (petEntity == null) return null;
         String typeStr = petEntity.getType();
@@ -33,7 +29,6 @@ public class PetFactory {
             throw new IllegalArgumentException("PetFactory.createPokemon: pet.type 为空字符串，无法创建 Pokemon");
         }
 
-        // 直接使用枚举解析（期望数据库中为中文枚举名）
         PokemonType type;
         try {
             type = PokemonType.valueOf(typeStr);
@@ -53,7 +48,7 @@ public class PetFactory {
         return pokemon;
     }
 
-    // 辅助方法：根据类型和等级创建Pokemon
+    //根据类型和等级创建Pokemon
     private static Pokemon createPokemonByType(PokemonType type, int level) {
         switch (type) {
             case 妙蛙种子:

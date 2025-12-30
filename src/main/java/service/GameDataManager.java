@@ -19,7 +19,7 @@ import pokemon.Pokemon;
 public class GameDataManager {
     private static GameDataManager instance;
     
-    // 全局变量
+    //全局变量
     private int currentUserId;
     private Player currentPlayer;
     private Bag playerBag;

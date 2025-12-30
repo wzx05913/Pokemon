@@ -1,8 +1,7 @@
 package entity;
 
-/**
- * 对应数据库pet表的实体类
- */
+//对应数据库pet表的实体类
+
 public class Pet {
     private int petId;
     private int userId; // 关联用户ID

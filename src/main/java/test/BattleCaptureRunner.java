@@ -24,7 +24,7 @@ public class BattleCaptureRunner {
         int userId = user.getUserId();
         System.out.println("Created test user id=" + userId);
 
-        // init game data
+        //初始化数据
         GameDataManager.getInstance().clearSession();
         Player player = new Player(100, userId);
         GameDataManager.getInstance().setCurrentPlayer(player);
@@ -32,7 +32,7 @@ public class BattleCaptureRunner {
         bag.setCoins(100);
         GameDataManager.getInstance().setBag(bag);
 
-        // prepare player's pet
+        //玩家宠物
         List<Pet> pets = new ArrayList<>();
         Pet p = new Pet(userId, "皮卡丘", 5, 50);
         p.setAlive(true);
@@ -47,7 +47,7 @@ public class BattleCaptureRunner {
         System.out.println("Enemy before: " + (enemy != null ? enemy.getInfo() : "null"));
         if (enemy != null) enemy.setHp(1);
 
-        // make capture deterministic
+        //捕捉
         Field rf = BattleManager.class.getDeclaredField("random");
         rf.setAccessible(true);
         rf.set(bm, new java.util.Random() { @Override public double nextDouble() { return 0.0; } });
@@ -64,11 +64,11 @@ public class BattleCaptureRunner {
 
         System.out.println("Global petList size: " + GameDataManager.getInstance().getPetList().size());
 
-        // list DB pets
+        //数据库宠物
         List<entity.Pet> stored = petDAO.getPetsByUserId(userId);
         System.out.println("DB stored pets count: " + stored.size());
 
-        // cleanup
+        //清洁
         petDAO.deletePetsByUserId(userId);
         System.out.println("Cleaned up DB pets for user " + userId);
     }

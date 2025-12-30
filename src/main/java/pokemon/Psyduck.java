@@ -7,7 +7,7 @@ public class Psyduck extends Pokemon {
 
     @Override
     protected void calculateStats() {
-        // 可达鸭：中等HP，随机攻击，低防御
+        //可达鸭
         this.maxHp = 35 + (level - 1) * 7;
         this.attack = 18 + (level - 1) * 4;
         this.defense = 16 + (level - 1) * 3;
@@ -39,7 +39,6 @@ public class Psyduck extends Pokemon {
         this.defense += 3;
     }
 
-    // 可达鸭的特殊能力 - 头疼爆发
     public int headacheAttack(Pokemon target) {
         System.out.println("可达鸭头疼爆发了！");
         int baseDamage = 20;

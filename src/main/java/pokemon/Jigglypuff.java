@@ -36,10 +36,9 @@ public class Jigglypuff extends Pokemon {
         this.hp = this.maxHp;
     }
 
-    // 胖丁的特殊技能效果
+    //特殊技能效果
     public boolean useSing(Pokemon target) {
         System.out.println("胖丁唱起了催眠曲！");
-        // 这里可以添加睡眠状态的逻辑
-        return Math.random() > 0.5;  // 50%几率成功
+        return Math.random() > 0.5;
     }
 }

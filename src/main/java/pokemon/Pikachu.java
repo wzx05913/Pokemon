@@ -7,7 +7,6 @@ public class Pikachu extends Pokemon {
 
     @Override
     protected void calculateStats() {
-        // 初始属性
         this.maxHp = 30 + (level - 1) * 8;
         this.attack = 20 + (level - 1) * 4;
         this.defense = 15 + (level - 1) * 3;
@@ -29,8 +28,8 @@ public class Pikachu extends Pokemon {
     @Override
     public void levelUp() {
         super.levelUp();
-        // 皮卡丘特殊成长
-        this.attack += 6;  // 攻击成长更高
-        this.defense += 3; // 防御成长较低
+        //皮卡丘特殊成长
+        this.attack += 6;
+        this.defense += 3;
     }
 }

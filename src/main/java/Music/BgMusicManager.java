@@ -11,7 +11,7 @@ public class BgMusicManager {
     private static BgMusicManager instance;
     private MediaPlayer currentPlayer;
     private final Map<String, String> sceneMusicFiles;
-    private static boolean musicEnabled = true; // 添加这个静态变量
+    private static boolean musicEnabled = true; //添加这个静态变量
 
     public static boolean isMusicEnabled() {
         return musicEnabled;
@@ -39,10 +39,10 @@ public class BgMusicManager {
         return instance;
     }
 
-    // 切换场景音乐
+    //切换场景音乐
     public void playSceneMusic(String sceneName) {
         if (!musicEnabled) {
-            return; // 如果音乐被禁用，直接返回
+            return; //如果音乐被禁用，直接返回
         }
 
         String musicFile = sceneMusicFiles.get(sceneName);

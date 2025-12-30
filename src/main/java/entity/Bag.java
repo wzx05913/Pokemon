@@ -1,8 +1,5 @@
 package entity;
 
-/**
- * 对应数据库bag表的实体类
- */
 public class Bag {
     private int bagId;
     private int userId; // 关联用户ID
@@ -13,7 +10,7 @@ public class Bag {
 
     public Bag() {}
 
-    // 创建新用户背包时使用
+    //创建新用户背包时使用
     public Bag(int userId) {
         this.userId = userId;
         this.eggCount = 0;

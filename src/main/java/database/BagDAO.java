@@ -6,13 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * 背包表数据访问对象
- */
 public class BagDAO {
-    /**
-     * 为用户创建背包
-     */
+
     public void createBag(Bag bag) throws SQLException {
         String sql = "INSERT INTO bag (UserID, EggCount, RiceCount, SoapCount, Coins) " +
                      "VALUES (?, ?, ?, ?, ?)";
@@ -30,9 +25,6 @@ public class BagDAO {
         }
     }
 
-    /**
-     * 查询用户的背包
-     */
     public Bag getBagByUserId(int userId) throws SQLException {
         String sql = "SELECT * FROM bag WHERE UserID = ?";
 
@@ -56,9 +48,7 @@ public class BagDAO {
         return null;
     }
 
-    /**
-     * 更新背包物品数量
-     */
+    //更新背包物品数量
     public void updateBag(Bag bag) throws SQLException {
         String sql = "UPDATE bag SET EggCount=?, RiceCount=?, SoapCount=?, Coins=? WHERE BagID=?";
 

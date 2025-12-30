@@ -23,21 +23,21 @@ public abstract class Pokemon {
     protected int maxPp;  // 最大PP值
     protected int pp;     // 当前PP值
 
-    // 状态：睡眠
+    //状态：睡眠
     protected boolean asleep = false;
     protected int asleepTurns = 0;
     
-    // 清洁度与存活状态
+    //清洁度与存活状态
     protected int clean = 100; // 默认为100
     protected boolean alive = true;
 
-    // 最近一次伤害是否暴击
+    //最近一次伤害是否暴击
     private boolean lastCritical = false;
 
-    // 技能列表
+    //技能列表
     protected List<Move> moves = new ArrayList<>();
 
-    // 构造函数
+    //构造函数
     public Pokemon(String name, int level) {
         this.name = name;
         this.level = level;
@@ -54,7 +54,7 @@ public abstract class Pokemon {
         int reduction = target.getDefense() / 4; // 防御只削弱一部分
         int damage = Math.max(1, raw - reduction);
 
-        // 暴击：20%概率，1.5倍伤害
+        //暴击：20%概率，1.5倍伤害
         boolean crit = rollCritical();
         if (crit) {
             damage = (int)Math.round(damage * 1.5);
@@ -65,7 +65,7 @@ public abstract class Pokemon {
         System.out.println(this.name + " 进行了普通攻击，造成 " + damage + " 点伤害" + (crit ? "（暴击！）" : ""));
         return damage;
     }
-    // 抽象方法 - 子类必须实现
+
     protected abstract void calculateStats();  // 计算属性值
     protected abstract void initializeMoves(); // 初始化技能
     protected abstract int calculateExpToNextLevel(); // 计算升级经验
@@ -73,7 +73,6 @@ public abstract class Pokemon {
 
     protected boolean inBattle = false;
 
-    // 标记进入/退出战斗
     public void enterBattle() {
         this.inBattle = true;
     }
@@ -81,34 +80,27 @@ public abstract class Pokemon {
         this.inBattle = false;
     }
 
-    // 修改 fullHeal，避免战斗中被误调用恢复
     public void fullHeal() {
         if (inBattle) {
-            // 战斗中不允许被外部随意 fullHeal（避免战死后复活）
             System.err.println("DEBUG: 被禁止的 fullHeal 调用: " + name + "（inBattle=true）");
             return;
         }
         this.hp = this.maxHp;
     }
 
-    // 可选：在 setHp 中记录来自哪里（用于进一步调试）
-    // 这是可选的调试代码，如果你愿意可以临时加入，便于追踪谁在恢复 HP
     public void setHp(int hp) {
         // 保持原有逻辑，仍然允许设置 hp（但是 fullHeal 禁止）
         this.hp = Math.min(hp, maxHp);
     }
-    // 受到伤害
+
     public void takeDamage(int damage) {
         this.hp = Math.max(0, this.hp - damage);
     }
 
-    // 恢复生命值
     public void heal(int amount) {
         this.hp = Math.min(this.maxHp, this.hp + amount);
     }
 
-
-    // 获得经验
     public void gainExp(int expGained) {
         this.exp += expGained;
         while (this.exp >= this.expToNextLevel) {
@@ -118,7 +110,6 @@ public abstract class Pokemon {
         }
     }
 
-    // 升级
     public void levelUp() {
         this.level++;
 
@@ -139,7 +130,7 @@ public abstract class Pokemon {
         this.pp = Math.min(maxPp, this.pp + 20);
     }
 
-    // 每回合小幅回复PP（用于跳过回合时逐回合恢复）
+    //每回合小幅回复PP（用于跳过回合时逐回合恢复）
     public void recoverPpEachTurn(int amount) {
         this.pp = Math.min(maxPp, this.pp + amount);
     }
@@ -253,17 +244,16 @@ public abstract class Pokemon {
         }
     }
 
-    // 降低攻击（用于“叫声”等技能）
+    //降低攻击（用于“叫声”等技能）
     public void reduceAttack() {
         this.attack = (int) Math.max(1, this.attack*0.8);
     }
 
-    // 提高攻击（用于“生长”等技能）
     public void increaseAttack() {
         this.attack = (int) Math.max(1, this.attack*1.3);
     }
 
-    // 提高防御（用于“缩入壳中”等技能）
+    //提高防御（用于“缩入壳中”等技能）
     public void increaseDefense() {
         this.defense = (int) Math.max(1, this.defense*1.5);
     }
@@ -272,9 +262,8 @@ public abstract class Pokemon {
         return lastCritical;
     }
 
-    // 暴击概率（可按需调整）
     protected boolean rollCritical() {
-        return Math.random() < 0.10; // 20% 概率
+        return Math.random() < 0.10;
     }
 
     // 获取信息
@@ -286,11 +275,11 @@ public abstract class Pokemon {
     public int getClean() { return clean; }
     public void setClean(int clean) { this.clean = Math.max(0, Math.min(100, clean)); }
 
-    // 存活状态
+    //存活状态
     public boolean isAlive() { return alive; }
     public void setAlive(boolean alive) { this.alive = alive; if (!alive) this.hp = 0; }
 
-    // 技能信息
+    //技能信息
     public String getMovesInfo() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < moves.size(); i++) {
@@ -301,7 +290,6 @@ public abstract class Pokemon {
         return sb.toString();
     }
 
-    // 添加PP相关的getter和setter（补充完整性）
     public int getMaxPp() {
         return maxPp;
     }
@@ -314,7 +302,7 @@ public abstract class Pokemon {
         this.pp = Math.min(pp, maxPp); // 确保不超过最大值
     }
 
-    // Getters
+    //Getters
     public String getName() { return name; }
     public int getLevel() { return level; }
     public int getHp() { return hp; }

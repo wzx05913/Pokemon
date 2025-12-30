@@ -3,17 +3,15 @@ package entity;
 import java.time.LocalDateTime;
 
 public class SaveData {
-    private int slot;           // 存档位编号
-    private String saveName;    // 存档名称
-    private LocalDateTime saveTime; // 存档时间
-    private String playerName;  // 玩家名称
-    private String playTime;    // 游戏时长
+    private int slot;           //存档位编号
+    private String saveName;    //存档名称
+    private LocalDateTime saveTime; //存档时间
+    private String playerName;  //玩家名称
+    private String playTime;    //游戏时长
 
-    // 构造函数
     public SaveData() {
     }
 
-    // Getter和Setter
     public int getSlot() {
         return slot;
     }

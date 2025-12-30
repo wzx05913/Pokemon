@@ -28,7 +28,7 @@ public class Charmander extends Pokemon {
     @Override
     public void levelUp() {
         super.levelUp();
-        // 小火龙特殊成长
+        //小火龙特殊成长
         this.attack += 7;  // 攻击成长很高
         this.defense += 2; // 防御成长很低
     }

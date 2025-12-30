@@ -8,9 +8,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 宠物表数据访问对象
- */
 public class PetDAO {
     public void deletePetsByUserId(int userId) throws SQLException {
         String sql = "DELETE FROM pet WHERE UserID = ?";
@@ -54,12 +51,9 @@ public class PetDAO {
         }
     }
 
-    /**
-     * 查询用户的所有宠物
-     */
     public List<Pet> getPetsByUserId(int userId) throws SQLException {
         List<Pet> pets = new ArrayList<>();
-        // 移除了Name字段
+        //移除了Name字段
         String sql = "SELECT * FROM pet WHERE UserID = ?";
 
         try (Connection conn = DBConnection.getInstance().getConnection();
@@ -84,9 +78,6 @@ public class PetDAO {
         return pets;
     }
 
-    /**
-     * 更新宠物信息
-     */
     public void updatePet(Pet pet) throws SQLException {
         // 移除了Name字段
         String sql = "UPDATE pet SET Type=?, Level=?, Attack=?, Clean=?, Experience=?, IsAlive=? " +
@@ -95,7 +86,7 @@ public class PetDAO {
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, pet.getType());  // Type就是名称
+            stmt.setString(1, pet.getType());  //Type就是名称
             stmt.setInt(2, pet.getLevel());
             stmt.setInt(3, pet.getAttack());
             stmt.setObject(4, pet.getClean());

@@ -72,23 +72,39 @@ public class BattleManager {
 
     private void initEnemy(List<Pokemon> playerPokemons) {
         enemyQueue = new LinkedList<>();
-        int enemyLevel;
 
-        if (playerPokemons.size() == 1) {
-            enemyLevel = playerPokemons.get(0).getLevel() - 1;
-        } else {
-            int maxLevel = playerPokemons.get(0).getLevel();
-            enemyLevel = maxLevel + random.nextInt(3) + 2; // 2-4级
+        int maxPlayerLevel = playerPokemons.stream()
+                .mapToInt(Pokemon::getLevel)
+                .max()
+                .orElse(5);
+
+        int enemyCount = (int) Math.ceil(playerPokemons.size() / 3.0);
+
+        enemyCount = Math.max(1, enemyCount);
+
+        PokemonType[] allTypes = PokemonType.values();
+
+        List<PokemonType> selectedTypes = new ArrayList<>();
+        for (int i = 0; i < enemyCount; i++) {
+            // 随机选择类型
+            PokemonType randomType;
+            int attempts = 0;
+            do {
+                randomType = allTypes[random.nextInt(allTypes.length)];
+                attempts++;
+            } while (selectedTypes.contains(randomType) && attempts < 10);
+
+            selectedTypes.add(randomType);
+
+            Pokemon enemy = createEnemyPokemon(randomType.name(), maxPlayerLevel+random.nextInt(3)+1);
+            if (enemy != null) {
+                enemyQueue.add(enemy);
+            } else {
+                enemyQueue.add(new Pikachu(maxPlayerLevel+random.nextInt(3)+1));
+            }
         }
 
-        //确保等级至少为1
-        enemyLevel = Math.max(1, enemyLevel);
-
-        PokemonType[] types = PokemonType.values();
-        PokemonType randomType = types[random.nextInt(types.length)];
-
-        Pokemon enemy = createEnemyPokemon(String.valueOf(randomType), enemyLevel);
-        enemyQueue.add(enemy);
+        System.out.println("DEBUG: 生成了 " + enemyQueue.size() + " 个敌人，等级为 " + maxPlayerLevel + " 级");
     }
 
     //创建敌人宝可梦
@@ -372,7 +388,7 @@ public class BattleManager {
         int userId = GameDataManager.getInstance().getCurrentUserId();
         boolean isGuest = (userId == -1);
 
-        if (random.nextDouble() <= 0.2) {
+        if (random.nextDouble() <= 0.5) {
             try {
                 Pet newPet = PetFactory.createPetEntity(userId, enemy);
 
