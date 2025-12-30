@@ -4,10 +4,10 @@ package core;
 import java.util.Random;
 
 public class Maze {
-    private static final int SIZE = 15; // 固定迷宫大小45x45
+    private static final int SIZE = 15; // 固定迷宫大小
     private static final int WALL = 1;
     private static final int PATH = 0;
-    private static final int TREASURE = 2; // 橙黄色点
+    private static final int TREASURE = 2; // 橙黄色点：敌人/宝箱
 
     private int[][] grid;
     private Point start;
@@ -57,7 +57,8 @@ public class Maze {
         for (int dir : order) {
             int nx = x + dx[dir];
             int ny = y + dy[dir];
-
+            
+            // 检查新位置是否在边界内且为墙
             if (nx > 0 && nx < SIZE - 1 && ny > 0 && ny < SIZE - 1 && grid[nx][ny] == WALL) {
                 // 打通当前单元格与下一个单元格之间的墙
                 grid[x + dx[dir] / 2][y + dy[dir] / 2] = PATH;
@@ -75,7 +76,7 @@ public class Maze {
                 x = random.nextInt(SIZE);
                 y = random.nextInt(SIZE);
             }while (grid[x][y] != PATH || 
-                    (x == start.getX() && y == start.getY()) ||  // 替换start.x为start.getX()
+                    (x == start.getX() && y == start.getY()) ||
                     (x == end.getX() && y == end.getY()));
 
             grid[x][y] = TREASURE;

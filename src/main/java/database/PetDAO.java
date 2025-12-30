@@ -59,7 +59,7 @@ public class PetDAO {
      */
     public List<Pet> getPetsByUserId(int userId) throws SQLException {
         List<Pet> pets = new ArrayList<>();
-        // 移除了Name字段
+        
         String sql = "SELECT * FROM pet WHERE UserID = ?";
 
         try (Connection conn = DBConnection.getInstance().getConnection();
@@ -88,7 +88,7 @@ public class PetDAO {
      * 更新宠物信息
      */
     public void updatePet(Pet pet) throws SQLException {
-        // 移除了Name字段
+        
         String sql = "UPDATE pet SET Type=?, Level=?, Attack=?, Clean=?, Experience=?, IsAlive=? " +
                 "WHERE PetID=?";
 

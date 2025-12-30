@@ -42,10 +42,12 @@ public class BattleController {
     private BattleManager battleManager;
     private List<Button> moveButtons = new ArrayList<>();
     private Parent root;
-    private Consumer<Boolean> battleEndCallback;
+    private Consumer<Boolean> battleEndCallback;//战斗结束回调
     private boolean coinsAwarded = false; // 防止重复发放
 
     public BattleController() {}
+
+    //初始化战斗
     public void initData(List<Pet> petList, Bag bag, Consumer<Boolean> callback) {
         this.battleEndCallback = callback;
         this.battleManager = new BattleManager();
@@ -57,21 +59,28 @@ public class BattleController {
 
         runAutoProgressLoop();
     }
+
+    //构造函数
     public BattleController(List<Pet> petList, Bag bag, Consumer<Boolean> callback) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/battle.fxml"));  // 假设你的战斗界面FXML路径
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/battle.fxml"));
+
+        // 设置控制器
         loader.setController(this);
         this.root = loader.load();
         this.battleEndCallback = callback;
-
+        
+        //排序宠物列表，确保高等级宠物优先出战
         List<Pet> sortedPetList = new ArrayList<>(petList);
         sortedPetList.sort((p1, p2) -> Integer.compare(p2.getLevel(), p1.getLevel())); // 从大到小排序
         this.battleManager = new BattleManager();
-        this.battleManager.initBattle(petList);
+        this.battleManager.initBattle(sortedPetList);
 
+        // 初始化界面
         initialize(battleManager);
     }
 
     public void initialize(BattleManager manager) {
+        // 设置 BattleManager
         this.battleManager = manager;
         updateBattleUI();
         createMoveButtons();
@@ -91,6 +100,7 @@ public class BattleController {
         Pokemon current = battleManager.getCurrentPlayerPokemon();
         if (current == null) return;
 
+        //创建技能按钮
         List<Move> moves = current.getMoves();
         for (int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
@@ -98,6 +108,8 @@ public class BattleController {
 
             Button button = new Button();
             String label;
+
+            //设置按钮文本
             if (move.getPower() > 0) {
                 label = move.getName() + "（造成伤害，消耗" + move.getPpCost() + "PP）";
             } else {
@@ -157,6 +169,7 @@ public class BattleController {
         }
     }
 
+    // 更新战斗界面
     private void updateBattleUI() {
         Pokemon playerPokemon = battleManager.getCurrentPlayerPokemon();
         Pokemon enemyPokemon = battleManager.getCurrentEnemyPokemon();
@@ -221,6 +234,7 @@ public class BattleController {
         }
     }
 
+    // 更新技能按钮状态
     private void updateMoveButtons() {
         Pokemon current = battleManager.getCurrentPlayerPokemon();
         if (current == null) return;
@@ -232,6 +246,7 @@ public class BattleController {
             return;
         }
 
+        //处理技能按钮
         for (int i = 0; i < moves.size() && i < moveButtons.size(); i++) {
             Move move = moves.get(i);
             Button button = moveButtons.get(i);

@@ -35,15 +35,16 @@ public class BattleManager {
 
     //初始化战斗
     public void initBattle(List<Pet> petList) {
-        if (BgMusicManager.isMusicEnabled()) BgMusicManager.getInstance().playSceneMusic("battle");
+        if (BgMusicManager.isMusicEnabled()) BgMusicManager.getInstance().playSceneMusic("battle");//播放战斗音乐
         playerQueue = new LinkedList<>();
+        //筛选出存活的宠物，创建对应的宝可梦对象，并按等级降序排序
         List<Pokemon> playerPokemons = petList.stream()
                 .filter(pet -> Boolean.TRUE.equals(pet.getAlive()))
                 .map(PokemonFactory::createPokemon)
                 .filter(p -> p != null && p.isAlive())
                 .sorted((p1, p2) -> Integer.compare(p2.getLevel(), p1.getLevel()))
                 .collect(Collectors.toList());
-
+        //将玩家宝可梦加入队列
         playerQueue.addAll(playerPokemons);
         initEnemy(playerPokemons);
 
@@ -59,10 +60,11 @@ public class BattleManager {
                 p.setPp(p.getMaxPp());
             });
         }
-
+        //移除队列头部所有已濒死的宝可梦（避免死的回到队列）
         removeFaintedFromQueue(playerQueue);
         removeFaintedFromQueue(enemyQueue);
 
+        //设置初始状态
         isPlayerTurn = true;
         currentPlayerPokemon = (playerQueue == null ? null : playerQueue.peek());
         currentEnemyPokemon = (enemyQueue == null ? null : enemyQueue.peek());
@@ -73,7 +75,7 @@ public class BattleManager {
     private void initEnemy(List<Pokemon> playerPokemons) {
         enemyQueue = new LinkedList<>();
         int enemyLevel;
-
+        //根据玩家宝可梦数量决定敌人等级
         if (playerPokemons.size() == 1) {
             enemyLevel = playerPokemons.get(0).getLevel() - 1;
         } else {
@@ -83,10 +85,10 @@ public class BattleManager {
 
         //确保等级至少为1
         enemyLevel = Math.max(1, enemyLevel);
-
+        //随机选择一种宝可梦类型作为敌人
         PokemonType[] types = PokemonType.values();
         PokemonType randomType = types[random.nextInt(types.length)];
-
+        //创建敌人宝可梦并加入队列
         Pokemon enemy = createEnemyPokemon(String.valueOf(randomType), enemyLevel);
         enemyQueue.add(enemy);
     }
@@ -118,6 +120,7 @@ public class BattleManager {
         }
     }
 
+    // 玩家使用技能
     public BattleStepResult playerUseMove(int moveIndex) {
         if (!isPlayerTurn || currentPlayerPokemon == null) {
             return new BattleStepResult(false, "不是你的回合");
@@ -139,27 +142,31 @@ public class BattleManager {
             return new BattleStepResult(true, currentPlayerPokemon.getName() + " 正在睡眠，无法行动。");
         }
 
+        // 如果 PP 不足，跳过并回复少量 PP
         if (currentPlayerPokemon.isPpDepleted()) {
             currentPlayerPokemon.recoverPpEachTurn(15); // 每次跳过回复10 PP
             isPlayerTurn = false;
             return new BattleStepResult(true, "你的 " + currentPlayerPokemon.getName() + " PP 不足，本回合回复了少量 PP。");
         }
 
+        // 检查技能索引有效性
         List<Move> moves = currentPlayerPokemon.getMoves();
         if (moveIndex < 0 || moveIndex >= moves.size()) {
             return new BattleStepResult(false, "无效的技能");
         }
 
+        // 检查 PP 是否足够
         Move move = moves.get(moveIndex);
         if (currentPlayerPokemon.getPp() < move.getPpCost()) {
             return new BattleStepResult(false, "PP不足，无法使用技能");
         }
-
+        // 使用技能
         int result = currentPlayerPokemon.useMove(moveIndex, currentEnemyPokemon);
         String message;
         if (result == -1) {
             message = currentPlayerPokemon.getName() + " 无法使用 " + move.getName() + "（被状态或PP阻止）";
         } else if (result == 0) {
+            // 特殊技能效果描述
             if ("叫声".equals(move.getName())) {
                 message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，降低了敌方的攻击！";
             } else if ("唱歌".equals(move.getName()) || "唱".equals(move.getName())) {
@@ -172,6 +179,7 @@ public class BattleManager {
                 message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，技能效果生效！";
             }
         } else {
+            // 有伤害的技能以及随机暴击
             message = currentPlayerPokemon.getName() + " 使用了 " + move.getName() + "，造成了 " + result + " 点伤害。";
             if (currentPlayerPokemon.wasLastCritical()) {
                 message += "（暴击！）";
@@ -228,7 +236,7 @@ public class BattleManager {
 
         List<Move> moves = currentEnemyPokemon.getMoves();
         Move bestMove = null;
-
+        //选择威力最高且有足够PP的技能
         for (Move move : moves) {
             if (currentEnemyPokemon.getPp() >= move.getPpCost() &&
                     (bestMove == null || move.getPower() > bestMove.getPower())) {
@@ -236,6 +244,7 @@ public class BattleManager {
             }
         }
 
+        //如果没有可用技能，执行普通攻击
         if (bestMove == null) {
             currentEnemyPokemon.recoverPpEachTurn(15);
             BattleStepResult basicAttackResult = enemyBasicAttack();
@@ -246,6 +255,7 @@ public class BattleManager {
             return new BattleStepResult(true, message);
         }
 
+        //使用选定的技能
         int moveIndex = moves.indexOf(bestMove);
         int result = currentEnemyPokemon.useMove(moveIndex, currentPlayerPokemon);
         String message;
@@ -270,21 +280,19 @@ public class BattleManager {
                 message += "（暴击！）";
             }
         }
-
+    
         if (currentPlayerPokemon != null && currentPlayerPokemon.isFainted()) {
             message += "\n你的" + currentPlayerPokemon.getName() + " 战死了！";
             playerQueue.poll();
             currentPlayerPokemon = (playerQueue == null ? null : playerQueue.peek());
-        } else {
         }
 
         if (currentEnemyPokemon != null && currentEnemyPokemon.isFainted()) {
             lastDefeatedEnemy = currentEnemyPokemon;
             enemyQueue.poll();
             currentEnemyPokemon = (enemyQueue == null ? null : enemyQueue.peek());
-        } else {
         }
-
+        //更新引用
         if (currentPlayerPokemon != null) {
             currentPlayerPokemon.recoverPpEachTurn(15);
         }
@@ -294,10 +302,12 @@ public class BattleManager {
         currentPlayerPokemon = (playerQueue == null ? null : playerQueue.peek());
         currentEnemyPokemon = (enemyQueue == null ? null : enemyQueue.peek());
 
+        //切换回玩家回合
         isPlayerTurn = true;
         return new BattleStepResult(true, message);
     }
 
+    // 处理自动回合（睡眠或PP不足时调用）
     public BattleStepResult handleAutoTurn() {
         //如果战斗已结束，不做事
         if (isBattleEnded()) {
@@ -310,6 +320,7 @@ public class BattleManager {
         currentEnemyPokemon = (enemyQueue == null ? null : enemyQueue.peek());
 
         if (isPlayerTurn) {
+            // 玩家回合
             if (currentPlayerPokemon == null) return null;
             if (currentPlayerPokemon.isAsleep()) {
                 currentPlayerPokemon.tickAsleep();
@@ -361,17 +372,20 @@ public class BattleManager {
         return false;
     }
 
+    // 尝试捕捉敌人宝可梦
     public boolean tryCatchEnemy() {
         if (battleResult != BattleResult.PLAYER_WIN) {
             return false;
         }
 
+        // 获取要捕捉的敌人宝可梦
         Pokemon enemy = lastDefeatedEnemy != null ? lastDefeatedEnemy : currentEnemyPokemon;
         if (enemy == null) return false;
 
         int userId = GameDataManager.getInstance().getCurrentUserId();
         boolean isGuest = (userId == -1);
 
+        //捕获概率
         if (random.nextDouble() <= 0.2) {
             try {
                 Pet newPet = PetFactory.createPetEntity(userId, enemy);
@@ -380,12 +394,14 @@ public class BattleManager {
                 // 使用反射设置ID，因为Pet类可能没有setId方法
                 setPetId(newPet, newPetId);
 
+                //存到全局宠物列表
                 List<Pet> petList = GameDataManager.getInstance().getPetList();
                 if (petList != null) {
                     petList.add(newPet);
-                    System.out.println("DEBUG: 新宠物已添加到列表，当前宠物数量: " + petList.size());
+                    System.out.println("新宠物已添加到列表，当前宠物数量: " + petList.size());
                 }
 
+                //添加到当前玩家的宠物列表
                 if (GameDataManager.getInstance().getCurrentPlayer() != null) {
                     Pokemon created = PetFactory.createPokemon(newPet);
                     if (created != null) {
@@ -393,7 +409,7 @@ public class BattleManager {
 
                         try {
                             GameDataManager.getInstance().addPokemon(created);
-                            System.out.println("DEBUG: 新Pokemon已添加到玩家和全局列表");
+                            System.out.println("新Pokemon已添加到玩家和全局列表");
                         } catch (Exception ex) {
                             System.err.println("将捕获的宠物加入全局 pokemonList 失败: " + ex.getMessage());
                         }
@@ -401,7 +417,7 @@ public class BattleManager {
                 }
 
                 lastDefeatedEnemy = null;
-                System.out.println("DEBUG: 捕获成功: " + enemy.getName() + " (ID: " + newPetId + ")" + (isGuest ? " (游客账号)" : ""));
+                System.out.println("捕获成功: " + enemy.getName() + " (ID: " + newPetId + ")" + (isGuest ? " (游客账号)" : ""));
                 return true;
             } catch (Exception ex) {
                 System.err.println("捕获宠物时发生错误: " + ex.getMessage());
@@ -409,7 +425,7 @@ public class BattleManager {
                 return false;
             }
         } else {
-            System.out.println("DEBUG: 捕获失败（未触发概率）");
+            System.out.println("捕获失败（未触发概率）");
         }
         return false;
     }
@@ -422,11 +438,11 @@ public class BattleManager {
         }
 
         int newId = petList.size() + 1;
-        System.out.println("DEBUG: 生成新宠物ID: " + newId + " (基于列表大小: " + petList.size() + ")");
+        System.out.println("生成新宠物ID: " + newId + " (基于列表大小: " + petList.size() + ")");
         return newId;
     }
 
-    //使用反射设置Pet的ID（因为Pet类可能没有setId方法）
+    //使用反射设置Pet的ID
     private void setPetId(Pet pet, int id) {
         try {
             //先尝试setId方法
@@ -455,7 +471,8 @@ public class BattleManager {
             System.err.println("设置宠物ID时发生错误: " + e.getMessage());
         }
     }
-
+    
+    // 玩家普通攻击
     public BattleStepResult playerBasicAttack() {
         if (!isPlayerTurn || currentPlayerPokemon == null) {
             return new BattleStepResult(false, "不是你的回合");
@@ -497,7 +514,8 @@ public class BattleManager {
         isPlayerTurn = false;
         return new BattleStepResult(true, message);
     }
-
+    
+    // 敌人普通攻击
     public BattleStepResult enemyBasicAttack(){
         removeFaintedFromQueue(playerQueue);
         removeFaintedFromQueue(enemyQueue);
@@ -523,6 +541,7 @@ public class BattleManager {
         return new BattleStepResult(true, Message);
     }
 
+    // 退出战斗，强制敌人获胜
     public void exitBattle() {
         battleResult = BattleResult.ENEMY_WIN;
         //清理 inBattle 标记（把队列中的所有 Pokemon 恢复为非战斗）

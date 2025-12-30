@@ -18,12 +18,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import javafx.scene.control.Alert;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -63,7 +61,7 @@ public class MainController {
             }
         }
 
-        //在这里注册事件过滤器
+        //注册事件过滤器
         container.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
             if (!container.getChildren().isEmpty()) {
                 Node currentNode = container.getChildren().get(0);
@@ -332,29 +330,7 @@ public class MainController {
         switchToPageWithFade("dialog1");
         BgMusicManager.getInstance().stopMusic();
     }
-    @FXML
-    private void enterMaze(ActionEvent event) {
-        try {
-            java.net.URL resource = getClass().getResource("/mazeEntry.fxml");
-            if (resource == null) {
-                System.err.println("无法找到 /mazeEntry.fxml");
-                Alert a = new Alert(Alert.AlertType.ERROR);
-                a.setTitle("错误");
-                a.setHeaderText(null);
-                a.setContentText("找不到迷宫入口资源(mazeEntry.fxml)。");
-                a.showAndWait();
-                return;
-            }
-            FXMLLoader loader = new FXMLLoader(resource);
-            Parent mazeEntryRoot = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("迷宫探索");
-            stage.setScene(new Scene(mazeEntryRoot, 400, 300));
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    
     // 返回主菜单
     @FXML
     void backToMain() {

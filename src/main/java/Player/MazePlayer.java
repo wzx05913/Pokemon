@@ -44,7 +44,7 @@ public class MazePlayer {
         return position.getY();  // 用getter获取y
     }
 
-    // 新增：更新位置的方法（供MazeController调用）
+    // 更新位置的方法
     public void setPosition(int x, int y) {
         this.position = new Point(x, y);
     }
