@@ -120,7 +120,7 @@ public class BedroomSelectController {
         System.out.println("休息（存档）按钮被点击");
         openSaveLoadWindow();
     }
-
+    
     private void openSaveLoadWindow() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/savewidget.fxml"));

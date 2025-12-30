@@ -143,7 +143,8 @@ public class MazeController {
         gc.clearRect(0, 0, width, height);
 
         int size = maze.getSize();
-        // Recompute cellSize in case canvas resized
+        
+        //重新计算单元格大小以适应当前画布尺寸
         cellSize = Math.max(4, (int) (Math.min(width, height) / size));
 
         for (int i = 0; i < size; i++) {

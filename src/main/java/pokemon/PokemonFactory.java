@@ -41,10 +41,10 @@ public class PokemonFactory {
             pokemon.setAlive(petEntity.getAlive());
         }
 
-        //修正：设置当前 HP 为最大 HP（而不是把 level 当 HP 写入）
+        // 设置当前 HP 为最大 HP
         pokemon.setHp(pokemon.getMaxHp());
 
-        //把数据库里的经验同步到 Pokemon（避免加载后 exp 为 0）
+        // 把数据库里的经验同步到 Pokemon（避免加载后 exp 为 0）
         try {
             Integer dbExp = petEntity.getExperience();
             if (dbExp != null) {
@@ -53,7 +53,7 @@ public class PokemonFactory {
                 pokemon.setExp(0);
             }
         } catch (Exception e) {
-            //保留默认经验 0
+            // 若类型不对或其它异常，保留默认经验 0
             pokemon.setExp(0);
         }
 

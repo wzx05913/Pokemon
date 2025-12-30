@@ -26,7 +26,7 @@ public class GameDataManager {
     private List<Pet> petList;
     private boolean isTemporary = false;
     private Pokemon currentPokemon;
-    private List<Pokemon> pokemonList = new ArrayList<>();  // 新增：存储所有宝可梦
+    private List<Pokemon> pokemonList = new ArrayList<>();  // 存储所有宝可梦
     
     private GameDataManager() {
         petList = new ArrayList<>();
@@ -80,7 +80,7 @@ public class GameDataManager {
         pokemonList.add(pokemon);
     }
     
-    // 新增：获取所有宝可梦
+    // 获取所有宝可梦
     public List<Pokemon> getPokemonList() {
         return pokemonList;
     }
@@ -134,7 +134,7 @@ public class GameDataManager {
     // 减少所有宠物的清洁度（只修改内存全局变量），并同步到 Pokemon 对象
     public void decreaseAllPetsClean(int amount) {
         if (pokemonList == null || pokemonList.isEmpty()) {
-            // 退回到对实体列表的处理（保守）
+            // 退回到对实体列表的处理
             if (petList == null) return;
             for (Pet pet : petList) {
                 if (pet.getClean() == null) pet.setClean(100);
