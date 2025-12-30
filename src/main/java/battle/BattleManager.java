@@ -75,20 +75,24 @@ public class BattleManager {
     private void initEnemy(List<Pokemon> playerPokemons) {
         enemyQueue = new LinkedList<>();
 
+        if (playerPokemons == null || playerPokemons.isEmpty()) {
+            Pokemon defaultEnemy = new Pikachu(5);
+            enemyQueue.add(defaultEnemy);
+            return;
+        }
+
         int maxPlayerLevel = playerPokemons.stream()
                 .mapToInt(Pokemon::getLevel)
                 .max()
                 .orElse(5);
 
         int enemyCount = (int) Math.ceil(playerPokemons.size() / 3.0);
-
         enemyCount = Math.max(1, enemyCount);
 
         PokemonType[] allTypes = PokemonType.values();
 
         List<PokemonType> selectedTypes = new ArrayList<>();
         for (int i = 0; i < enemyCount; i++) {
-            // 随机选择类型
             PokemonType randomType;
             int attempts = 0;
             do {
@@ -98,15 +102,23 @@ public class BattleManager {
 
             selectedTypes.add(randomType);
 
-            Pokemon enemy = createEnemyPokemon(randomType.name(), maxPlayerLevel+random.nextInt(3)+1);
+            int enemyLevel;
+            if (playerPokemons.size() == 1) {
+                enemyLevel = maxPlayerLevel;
+            } else {
+                enemyLevel = maxPlayerLevel + random.nextInt(3) + 1;
+            }
+
+            Pokemon enemy = createEnemyPokemon(randomType.name(), enemyLevel);
             if (enemy != null) {
                 enemyQueue.add(enemy);
             } else {
-                enemyQueue.add(new Pikachu(maxPlayerLevel+random.nextInt(3)+1));
+                enemyQueue.add(new Pikachu(enemyLevel));
             }
         }
 
-        System.out.println("DEBUG: 生成了 " + enemyQueue.size() + " 个敌人，等级为 " + maxPlayerLevel + " 级");
+        System.out.println("DEBUG: 生成了 " + enemyQueue.size() + " 个敌人，等级为 " +
+                (playerPokemons.size() == 1 ? "同级" : (maxPlayerLevel + "+1-3")) + " 级");
     }
 
     //创建敌人宝可梦

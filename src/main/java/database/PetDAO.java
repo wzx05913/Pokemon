@@ -8,9 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 宠物表数据访问对象
- */
+//宠物表数据访问对象
+
 public class PetDAO {
     public void deletePetsByUserId(int userId) throws SQLException {
         String sql = "DELETE FROM pet WHERE UserID = ?";
